@@ -367,6 +367,7 @@ void BaseApp::create_logical_device() {
     
     vk::PhysicalDeviceFeatures device_features{};
     device_features.samplerAnisotropy = VK_TRUE;
+    device_features.tessellationShader = VK_TRUE;
     
     vk::DeviceCreateInfo create_info{};
     create_info.sType                   = vk::StructureType::eDeviceCreateInfo; //VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -818,23 +819,39 @@ vk::ShaderModule BaseApp::create_shader_module( const std::vector<char>& code ) 
 
 void BaseApp::create_graphics_pipeline() {
 
-    auto vert_shader_code = read_file( "res/shaders/vert.spv" );
-    auto frag_shader_code = read_file( "res/shaders/frag.spv" );
+    auto vert_shader_code = read_file( "bin/shaders/vert.spv" );
+    auto tesc_shader_code = read_file( "bin/shaders/tesc.spv" );
+    auto tese_shader_code = read_file( "bin/shaders/tese.spv" );
+    auto frag_shader_code = read_file( "bin/shaders/frag.spv" );
 
-    vk::ShaderModule vertShaderModule = create_shader_module( vert_shader_code );
-    vk::ShaderModule fragShaderModule = create_shader_module( frag_shader_code );
+    vk::ShaderModule vert_shader_module = create_shader_module( vert_shader_code );
+    vk::ShaderModule tesc_shader_module = create_shader_module( tesc_shader_code );
+    vk::ShaderModule tese_shader_module = create_shader_module( tese_shader_code );
+    vk::ShaderModule frag_shader_module = create_shader_module( frag_shader_code );
 
 
     vk::PipelineShaderStageCreateInfo vert_shader_stage_info{};
     vert_shader_stage_info.sType    = vk::StructureType         ::ePipelineShaderStageCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vert_shader_stage_info.stage    = vk::ShaderStageFlagBits   ::eVertex; //VK_SHADER_STAGE_VERTEX_BIT;
-    vert_shader_stage_info.module   = vertShaderModule;
+    vert_shader_stage_info.module   = vert_shader_module;
     vert_shader_stage_info.pName    = "main";
+
+    vk::PipelineShaderStageCreateInfo tesc_shader_stage_info{};
+    tesc_shader_stage_info.sType    = vk::StructureType         ::ePipelineShaderStageCreateInfo;
+    tesc_shader_stage_info.stage    = vk::ShaderStageFlagBits   ::eTessellationControl;
+    tesc_shader_stage_info.module   = tesc_shader_module;
+    tesc_shader_stage_info.pName    = "main";
+
+    vk::PipelineShaderStageCreateInfo tese_shader_stage_info{};
+    tese_shader_stage_info.sType    = vk::StructureType         ::ePipelineShaderStageCreateInfo;
+    tese_shader_stage_info.stage    = vk::ShaderStageFlagBits   ::eTessellationEvaluation;
+    tese_shader_stage_info.module   = tese_shader_module;
+    tese_shader_stage_info.pName    = "main";
 
     vk::PipelineShaderStageCreateInfo frag_shader_stage_info{};
     frag_shader_stage_info.sType    = vk::StructureType         ::ePipelineShaderStageCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     frag_shader_stage_info.stage    = vk::ShaderStageFlagBits   ::eFragment; //VK_SHADER_STAGE_FRAGMENT_BIT;
-    frag_shader_stage_info.module   = fragShaderModule;
+    frag_shader_stage_info.module   = frag_shader_module;
     frag_shader_stage_info.pName    = "main";
 
     vk::PipelineShaderStageCreateInfo shaderStages[] = {
@@ -887,7 +904,7 @@ void BaseApp::create_graphics_pipeline() {
     rasterizer.sType                    = vk::StructureType     ::ePipelineRasterizationStateCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable         = VK_FALSE;
     rasterizer.rasterizerDiscardEnable  = VK_FALSE;
-    rasterizer.polygonMode              = vk::PolygonMode       ::eFill; //VK_POLYGON_MODE_FILL;
+    rasterizer.polygonMode              = vk::PolygonMode       ::eLine; //VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth                = 1.0f;
     rasterizer.cullMode                 = vk::CullModeFlagBits  ::eBack; //VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace                = vk::FrontFace         ::eCounterClockwise; //VK_FRONT_FACE_COUNTER_CLOCKWISE;
@@ -895,6 +912,11 @@ void BaseApp::create_graphics_pipeline() {
     rasterizer.depthBiasConstantFactor  = 0.0f;
     rasterizer.depthBiasClamp           = 0.0f;
     rasterizer.depthBiasSlopeFactor     = 0.0f;
+
+    vk::PipelineTessellationStateCreateInfo tessellation{};
+    tessellation.sType                  = vk::StructureType::ePipelineTessellationStateCreateInfo;
+    tessellation.flags                  = {};
+    tessellation.patchControlPoints     = 4;
 
     vk::PipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType                 = vk::StructureType::ePipelineMultisampleStateCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -966,6 +988,7 @@ void BaseApp::create_graphics_pipeline() {
     pipeline_info.pColorBlendState      = &color_blending;
     pipeline_info.pDepthStencilState    = &depth_stencil;
     pipeline_info.pDynamicState         = &dynamic_state;
+    pipeline_info.pTessellationState    = &tessellation;
 
     pipeline_info.layout        = pipeline_layout;
 
@@ -980,8 +1003,8 @@ void BaseApp::create_graphics_pipeline() {
         throw std::runtime_error( "failed to create graphics pipeline!" );
     }
 
-    device.destroyShaderModule( fragShaderModule, nullptr );
-    device.destroyShaderModule( vertShaderModule, nullptr );
+    device.destroyShaderModule( frag_shader_module, nullptr );
+    device.destroyShaderModule( vert_shader_module, nullptr );
 
 }
 
@@ -1670,7 +1693,7 @@ void BaseApp::cleanup() {
     device.destroyRenderPass( render_pass, nullptr );
     
     if( enable_validation_layers ) {
-        instance.destroyDebugUtilsMessengerEXT( debug_messenger, nullptr, vk::detail::DispatchLoaderDynamic{} ); 
+        instance.destroyDebugUtilsMessengerEXT( debug_messenger ); 
     }
     
     device.destroy( nullptr );

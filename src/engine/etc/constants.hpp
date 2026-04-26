@@ -7,8 +7,8 @@
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-const uint32_t WIDTH = 800;
-const uint32_t HEIGHT = 600;
+const uint32_t WIDTH = 2880;
+const uint32_t HEIGHT = 1920;
 
 const std::string MODEL_PATH = "res/models/viking_room.obj";
 const std::string TEXTURE_PATH = "res/textures/viking_room.png";
