@@ -48,7 +48,7 @@ void BaseApp::draw_frame() {
     
     device.resetFences( 1, &in_flight_fences[current_frame] );
 
-    vkResetCommandBuffer( command_buffers[current_frame], 0 );
+    command_buffers[current_frame].reset({ });
 
     record_command_buffer( command_buffers[current_frame], image_index );
 
@@ -68,7 +68,7 @@ void BaseApp::draw_frame() {
     submit_info.commandBufferCount   = 1;
     submit_info.pCommandBuffers      = &command_buffers[current_frame];
 
-    vk::Semaphore signal_semaphores[]    = { render_finished_semaphores[current_frame] };
+    vk::Semaphore signal_semaphores[]    = { render_finished_semaphores[image_index] };
     submit_info.signalSemaphoreCount     = 1;
     submit_info.pSignalSemaphores        = signal_semaphores;
 
@@ -90,8 +90,8 @@ void BaseApp::draw_frame() {
 
     result = present_queue.presentKHR( &present_info );
 
-    if( result == vk::Result::eErrorOutOfDateKHR || 
-        result == vk::Result::eSuboptimalKHR || framebuffer_resized ) {
+    if( result == vk::Result::eErrorOutOfDateKHR    || 
+        result == vk::Result::eSuboptimalKHR        || framebuffer_resized ) {
             framebuffer_resized = false;
             recreate_swapchain();
     }

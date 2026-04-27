@@ -45,9 +45,12 @@ void BaseApp::cleanup() {
     device.destroyBuffer( index_buffer, nullptr );
     device.freeMemory( index_buffer_memory, nullptr );
 
+    for( size_t i = 0; i < swapchain_images.size(); i++ ) {
+        device.destroySemaphore( render_finished_semaphores[i], nullptr );
+    }
+
     for( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ ) {
         device.destroySemaphore( image_available_semaphores[i], nullptr );
-        device.destroySemaphore( render_finished_semaphores[i], nullptr );
         device.destroyFence( in_flight_fences[i], nullptr );
     }
     device.destroyCommandPool( command_pool, nullptr );
