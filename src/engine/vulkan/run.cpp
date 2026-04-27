@@ -23,7 +23,7 @@ void BaseApp::init_vulkan() {
     create_texture_image();
     create_texture_image_view();
     create_texture_sampler();
-    load_model();
+    load_models();
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
@@ -121,6 +121,14 @@ void BaseApp::run() {
 }
 
 class TestApp : public BaseApp {
+public:
+
+    TestApp() {
+        model_paths.push_back( MODEL_PATH );
+    }
+
+private:
+
     void record_command_buffer( vk::CommandBuffer command_buffer, uint32_t image_index ) override {
         vk::CommandBufferBeginInfo begin_info{};
         begin_info.sType = vk::StructureType::eCommandBufferBeginInfo, //VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;

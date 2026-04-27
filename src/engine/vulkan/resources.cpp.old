@@ -1,5 +1,4 @@
 #include "engine_core.hpp"
-#include <set>
 
 // i don't know why does it work, but it does!  -kosmx
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE

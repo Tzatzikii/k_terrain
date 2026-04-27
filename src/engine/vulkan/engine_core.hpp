@@ -8,11 +8,14 @@
 #include <optional>
 #include <iostream>
 #include <chrono>
+#include <set>
 #include "../etc/helpers.hpp"
 #include "../etc/constants.hpp"
 #include "../math/vertex.hpp"
 
 namespace ec {
+
+std::vector<char> read_file( const std::string& filename );
 
 class BaseApp {
 
@@ -33,6 +36,7 @@ protected:
     uint32_t    APP_MAJOR_VERSION = 0;
     uint32_t    APP_MINOR_VERSION = 1;
     uint32_t    APP_PATCH_VERSION = 0;
+    std::vector<std::string> model_paths;
 
     virtual void record_command_buffer( vk::CommandBuffer command_buffer, uint32_t image_index ){}
 
@@ -101,10 +105,11 @@ protected:
 
     vk::SampleCountFlagBits     msaa_samples = vk::SampleCountFlagBits::e1;
 
+
     std::vector<ec::vertex>     vertices;
     std::vector<uint32_t>       indices;
 
-    uint32_t                    current_frame;
+    uint32_t                    current_frame = 0;
 
     void main_loop();
     void draw_frame();
@@ -129,7 +134,8 @@ protected:
     void create_texture_image();
     void create_texture_image_view();
     void create_texture_sampler();
-    void load_model();
+    void load_model( std::string path );
+    void load_models();
     void create_vertex_buffer();
     void create_index_buffer();
     void create_uniform_buffers();

@@ -1,31 +1,24 @@
-#version 450 core
+#version 450
 
-// specify number of control points per patch output
-// this value controls the size of the input and output arrays
-layout (vertices=4) out;
+layout(vertices = 3) out; // triangle patches
 
-// varying input from vertex shader
-layout(location = 1) in vec2 inTexCoord[];
-// varying output to evaluation shader
-layout(location = 1) out vec2 outTexCoord[];
+layout(location = 1) in vec2 in_tex_coords[];
+layout(location = 1) out vec2 out_tex_coords[];
 
-void main()
-{
-    // ----------------------------------------------------------------------
-    // pass attributes through
+void main() {
+    // Pass through positions
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-    outTexCoord[gl_InvocationID] = inTexCoord[gl_InvocationID];
 
-    // ----------------------------------------------------------------------
-    // invocation zero controls tessellation levels for the entire patch
-    if (gl_InvocationID == 0)
-    {
-        gl_TessLevelOuter[0] = 16;
-        gl_TessLevelOuter[1] = 16;
-        gl_TessLevelOuter[2] = 16;
-        gl_TessLevelOuter[3] = 16;
+    out_tex_coords[gl_InvocationID] = in_tex_coords[gl_InvocationID];
 
-        gl_TessLevelInner[0] = 16;
-        gl_TessLevelInner[1] = 16;
+    // One invocation sets tessellation levels
+    if (gl_InvocationID == 0) {
+        // Outer edges
+        gl_TessLevelOuter[0] = 4.0;
+        gl_TessLevelOuter[1] = 4.0;
+        gl_TessLevelOuter[2] = 4.0;
+
+        // Inner (for triangles, only [0] is used)
+        gl_TessLevelInner[0] = 4.0;
     }
 }
