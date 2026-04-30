@@ -12,6 +12,8 @@
 #include "../etc/helpers.hpp"
 #include "../etc/constants.hpp"
 #include "../math/vertex.hpp"
+#include "../classes/terrain.hpp"
+#include "../classes/camera.hpp"
 
 namespace ec {
 
@@ -29,6 +31,11 @@ public:
             const vk::DebugUtilsMessengerCallbackDataEXT* p_callback_data,
             void * p_user_data
     );
+    virtual void key_events() = 0;
+    virtual void cursor_events( double xpos, double ypos ) = 0;
+    void glfw_key_callback( GLFWwindow* window, int key, int scancode, int action, int mods );
+    void glfw_cursor_callback( GLFWwindow* window, double xpos, double ypos );
+
 
 protected:
 
@@ -39,6 +46,7 @@ protected:
     std::vector<std::string> model_paths;
 
     virtual void record_command_buffer( vk::CommandBuffer command_buffer, uint32_t image_index ){}
+
 
 
 //private: TEMPORARY!!!!!!
@@ -99,6 +107,10 @@ protected:
     vk::DeviceMemory            depth_image_memory;
     vk::ImageView               depth_image_view;
 
+    vk::Image                   shadow_depth_image;
+    vk::DeviceMemory            shadow_depth_image_memory;
+    vk::ImageView               shadow_depth_image_view;
+
     vk::Image                   color_image;
     vk::DeviceMemory            color_image_memory;
     vk::ImageView               color_image_view;
@@ -110,6 +122,12 @@ protected:
     std::vector<uint32_t>       indices;
 
     uint32_t                    current_frame = 0;
+
+    Camera                      camera = Camera({0, 0, 1});
+    
+    std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
+
+    bool cursor_enabled         = false;
 
     void main_loop();
     void draw_frame();
@@ -167,7 +185,6 @@ protected:
 
     void                        transition_image_layout( vk::Image image, vk::Format format, vk::ImageLayout old_layout, vk::ImageLayout new_layout, uint32_t mip_levels );
 
-
     vk::ImageView               create_image_view( vk::Image image, vk::Format format, vk::ImageAspectFlags aspect_flags, uint32_t mip_level );
     void                        create_image( 
                                     uint32_t                width, 
@@ -201,6 +218,7 @@ protected:
     void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
     void generate_mipmaps( vk::Image image, vk::Format image_format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels );
     void update_uniform_buffer( uint32_t currentImage );
+
 
     static bool check_validation_layer_support();
     static void framebuffer_resize_callback( GLFWwindow * window, int width, int height ) {

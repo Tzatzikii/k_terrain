@@ -9,6 +9,8 @@ void BaseApp::cleanup_swapchain() {
     device.destroyImageView( depth_image_view, nullptr );
     device.destroyImage( depth_image, nullptr );
     device.freeMemory( depth_image_memory, nullptr );
+    device.destroyImage( shadow_depth_image, nullptr );
+    device.freeMemory( shadow_depth_image_memory, nullptr );
 
 
     for( auto framebuffer : swapchain_framebuffers ) {
@@ -30,6 +32,7 @@ void BaseApp::cleanup() {
 
     device.destroyImage( texture_image, nullptr );
     device.freeMemory( texture_image_memory, nullptr );
+
 
     for( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ ) {
         device.destroyBuffer( uniform_buffers[i], nullptr );

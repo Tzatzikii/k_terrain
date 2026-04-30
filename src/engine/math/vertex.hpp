@@ -10,13 +10,12 @@ namespace ec {
 
 struct vertex {
     glm::vec3 pos;
-    glm::vec3 color;
     glm::vec2 tex_coord;
 
     static vk::VertexInputBindingDescription                    get_binding_description();
-    static std::array<vk::VertexInputAttributeDescription, 3>   get_attribute_descriptions();
+    static std::array<vk::VertexInputAttributeDescription, 2>   get_attribute_descriptions();
     
-    bool operator==( const vertex& other ) const;
+    bool    operator==  ( const vertex& other ) const;
 };
 
 } // namespace ec
@@ -24,9 +23,8 @@ struct vertex {
 namespace std {
     template<> struct hash<ec::vertex> {
         size_t operator()( ec::vertex const& vertex ) const {
-            return ( ( hash<glm::vec3>()( vertex.pos ) ^
-                     ( hash<glm::vec3>()( vertex.color ) << 1 ) ) >> 1) ^
-                     ( hash<glm::vec2>()( vertex.tex_coord ) << 1 );
+            return  ( hash<glm::vec3>()( vertex.pos ) ) ^
+                    ( hash<glm::vec2>()( vertex.tex_coord ) << 1 );
         }
     };
 }

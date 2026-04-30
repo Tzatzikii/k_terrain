@@ -103,8 +103,9 @@ void BaseApp::draw_frame() {
 }
 
 void BaseApp::main_loop() {
-    while( !glfwWindowShouldClose(window)) {
+    while( !glfwWindowShouldClose(window) ) {
         glfwPollEvents();
+        key_events();
         draw_frame();
     }
 
@@ -128,6 +129,32 @@ public:
     }
 
 private:
+
+    void key_events() override {
+        if( keys_pressed[ GLFW_KEY_W ] ) {
+            camera.forwards(1.0f);
+        }
+        if( keys_pressed[ GLFW_KEY_S ] ) {
+            camera.forwards(-1.0f);
+        }
+        if( keys_pressed[ GLFW_KEY_A ] ) {
+            camera.sideways(-1.0f);
+        }
+        if( keys_pressed[ GLFW_KEY_D ] ) {
+            camera.sideways(1.0f);
+        }
+    }
+
+    void cursor_events( double xpos, double ypos ) override {
+        static double px = 0;
+        static double py = 0;
+        double dx = px-xpos;
+        double dy = py-ypos;
+        camera.rotate( static_cast<float>( dx ), static_cast<float>( dy ) );
+        px = xpos;
+        py = ypos;
+    }
+
 
     void record_command_buffer( vk::CommandBuffer command_buffer, uint32_t image_index ) override {
         vk::CommandBufferBeginInfo begin_info{};
@@ -161,7 +188,7 @@ private:
         vk::DeviceSize offsets[] = { 0 };
         command_buffer.bindVertexBuffers( 0, 1, vertex_buffers, offsets );
 
-        vkCmdBindIndexBuffer( command_buffer, index_buffer, 0, VK_INDEX_TYPE_UINT32 );
+        command_buffer.bindIndexBuffer( index_buffer, 0, vk::IndexType::eUint32 );
 
         vk::Viewport viewport{};
         viewport.x          = 0.0f;
@@ -184,9 +211,7 @@ private:
         
         command_buffer.endRenderPass();
 
-        if( vkEndCommandBuffer( command_buffer ) != VK_SUCCESS ) {
-            throw std::runtime_error( "failed to record command buffer!" );
-        }
+        command_buffer.end();
     }
 
 };
