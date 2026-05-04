@@ -71,7 +71,7 @@ bool BaseApp::check_device_extension_support( vk::PhysicalDevice device ) {
     return required_extensions.empty();
 }
 
-uint32_t BaseApp::find_memory_type( uint32_t type_filter, vk::MemoryPropertyFlags properties ) {
+uint32_t find_memory_type( vk::PhysicalDevice physical_device, uint32_t type_filter, vk::MemoryPropertyFlags properties ) {
     vk::PhysicalDeviceMemoryProperties mem_properties = physical_device.getMemoryProperties();
 
     for( uint32_t i = 0; i < mem_properties.memoryTypeCount; i++ ) {
@@ -167,7 +167,6 @@ void BaseApp::copy_buffer_to_image( vk::Buffer buffer, vk::Image image, uint32_t
         1
     };
 
-    
     command_buffer.copyBufferToImage(
         buffer,
         image,

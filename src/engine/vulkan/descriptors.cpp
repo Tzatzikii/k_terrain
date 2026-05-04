@@ -41,7 +41,7 @@ void BaseApp::create_descriptor_sets() {
 
         vk::DescriptorImageInfo image_info{};
         image_info.imageLayout  = vk::ImageLayout::eShaderReadOnlyOptimal; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        image_info.imageView    = texture_image_view;
+        image_info.imageView    = texture.get_view(); //texture_image_view;
         image_info.sampler      = texture_sampler;
 
         std::array<vk::WriteDescriptorSet, 2> descriptor_writes{};

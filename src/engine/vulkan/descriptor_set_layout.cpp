@@ -16,7 +16,8 @@ void BaseApp::create_descriptor_set_layout() {
     sampler_layout_binding.descriptorCount    = 1;
     sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     sampler_layout_binding.pImmutableSamplers = nullptr;
-    sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment;//VK_SHADER_STAGE_FRAGMENT_BIT;
+    sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
+                                                vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
 
     std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {
         ubo_layout_binding, sampler_layout_binding 

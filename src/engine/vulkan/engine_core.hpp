@@ -14,10 +14,12 @@
 #include "../math/vertex.hpp"
 #include "../classes/terrain.hpp"
 #include "../classes/camera.hpp"
+#include "texture.hpp"
 
 namespace ec {
 
 std::vector<char> read_file( const std::string& filename );
+extern uint32_t find_memory_type( vk::PhysicalDevice physical_device, uint32_t type_filter, vk::MemoryPropertyFlags properties );
 
 class BaseApp {
 
@@ -102,6 +104,11 @@ protected:
     vk::DeviceMemory            texture_image_memory;
     vk::ImageView               texture_image_view;
     vk::Sampler                 texture_sampler;
+    ec::Texture                 texture;
+
+    vk::Image                   noise_image;
+    vk::DeviceMemory            noise_image_memory;
+    vk::ImageView               noise_image_view;;
 
     vk::Image                   depth_image;
     vk::DeviceMemory            depth_image_memory;
@@ -123,7 +130,7 @@ protected:
 
     uint32_t                    current_frame = 0;
 
-    Camera                      camera = Camera({0, 0, 1});
+    Camera                      camera = Camera({0, 0, 16.0});
     
     std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
 

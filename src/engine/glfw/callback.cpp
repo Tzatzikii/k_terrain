@@ -18,7 +18,7 @@ void key_callback( GLFWwindow* window, int key, int scancode, int action, int mo
 void BaseApp::glfw_key_callback( GLFWwindow* window, int key, int scancode, int action, int mods ) {
     int state = glfwGetKey( window, key );
 
-    if( key == GLFW_KEY_ESCAPE && state == GLFW_RELEASE ) {
+    if( (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q ) && state == GLFW_RELEASE ) {
         auto mode = glfwGetInputMode( window, GLFW_CURSOR );
         if( mode == GLFW_CURSOR_DISABLED ) {
             glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_NORMAL );

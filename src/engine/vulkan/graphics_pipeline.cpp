@@ -111,7 +111,7 @@ void BaseApp::create_graphics_pipeline(
     rasterizer.sType                    = vk::StructureType     ::ePipelineRasterizationStateCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable         = VK_FALSE;
     rasterizer.rasterizerDiscardEnable  = VK_FALSE;
-    rasterizer.polygonMode              = vk::PolygonMode       ::eFill; //VK_POLYGON_MODE_FILL;
+    rasterizer.polygonMode              = vk::PolygonMode       ::eLine; //VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth                = 1.0f;
     rasterizer.cullMode                 = vk::CullModeFlagBits  ::eBack; //VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace                = vk::FrontFace         ::eCounterClockwise; //VK_FRONT_FACE_COUNTER_CLOCKWISE;

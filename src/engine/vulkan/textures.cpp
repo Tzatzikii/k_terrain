@@ -1,4 +1,7 @@
 #include "engine_core.hpp"
+#include "texture.hpp"
+
+#include "../../../libs/FastNoise.h"
 
 namespace ec {
 
@@ -6,12 +9,27 @@ void BaseApp::create_texture_image() {
     int tex_width, tex_height, tex_channels;
     stbi_uc * pixels = stbi_load( TEXTURE_PATH.c_str(), &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha );
     vk::DeviceSize image_size = tex_width * tex_height * 4;
-
-    mip_levels = static_cast<uint32_t>( std::floor( std::log2( std::max( tex_width, tex_height ) ) ) ) + 1;
-
+    unsigned char* noise_pixels = new unsigned char[image_size];
+    //mip_levels = static_cast<uint32_t>( std::floor( std::log2( std::max( tex_width, tex_height ) ) ) ) + 1;
+    mip_levels = 1;
     if( !pixels ) {
         throw std::runtime_error( "failed to load texture image!" );
     }
+
+    FastNoise noise{};
+    float scale = 2.0f/256.0f;
+    int index = 0;
+    for( int x = 0; x < tex_width; x++ ) {
+        for( int y = 0; y < tex_height; y++ ) {
+            float n = noise.GetNoise(static_cast<float>(x), static_cast<float>(y));
+            unsigned char pixel = static_cast<unsigned char>(std::clamp( (n+1.0f)/scale, 0.0f, 255.0f ));
+            noise_pixels[index++] = pixel;
+            noise_pixels[index++] = pixel;
+            noise_pixels[index++] = pixel;
+            noise_pixels[index++] = 255;
+        }
+    }
+    
 
     vk::Buffer staging_buffer;
     vk::DeviceMemory staging_buffer_memory;
@@ -29,41 +47,47 @@ void BaseApp::create_texture_image() {
     std::memcpy( data, pixels, static_cast<size_t>( image_size ) );
     vkUnmapMemory( device, staging_buffer_memory );
 
-    stbi_image_free( pixels );
+    vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
+    texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
+    free(noise_pixels);
     
-    create_image( 
-        tex_width, 
-        tex_height, 
-        this->mip_levels, 
-        vk::SampleCountFlagBits ::e1, //VK_SAMPLE_COUNT_1_BIT, 
-        vk::Format              ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-        vk::ImageTiling         ::eOptimal, //VK_IMAGE_TILING_OPTIMAL,
+    end_single_time_commands( temp_cmd_buffer );
 
-        vk::ImageUsageFlagBits  ::eTransferDst  | // VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
-        vk::ImageUsageFlagBits  ::eSampled      | // VK_IMAGE_USAGE_SAMPLED_BIT      | 
-        vk::ImageUsageFlagBits  ::eTransferSrc,   // VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-
-        vk::MemoryPropertyFlagBits::eDeviceLocal, //VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-        texture_image, 
-        texture_image_memory 
-    );
-
-    transition_image_layout( 
-        texture_image, 
-        vk::Format      ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-        vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
-        vk::ImageLayout ::eTransferDstOptimal, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-        this->mip_levels 
-    );
+    // stbi_image_free( pixels );
     
-    //graphics_queue.waitIdle();
+    // create_image( 
+    //     tex_width, 
+    //     tex_height, 
+    //     this->mip_levels, 
+    //     vk::SampleCountFlagBits ::e1, //VK_SAMPLE_COUNT_1_BIT, 
+    //     vk::Format              ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
+    //     vk::ImageTiling         ::eOptimal, //VK_IMAGE_TILING_OPTIMAL,
 
-    copy_buffer_to_image( 
-        staging_buffer, 
-        texture_image, 
-        static_cast<uint32_t>( tex_width ),
-        static_cast<uint32_t>( tex_height ) 
-    );
+    //     vk::ImageUsageFlagBits  ::eTransferDst  | // VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
+    //     vk::ImageUsageFlagBits  ::eSampled      | // VK_IMAGE_USAGE_SAMPLED_BIT      | 
+    //     vk::ImageUsageFlagBits  ::eTransferSrc,   // VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+
+    //     vk::MemoryPropertyFlagBits::eDeviceLocal, //VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+    //     texture_image, 
+    //     texture_image_memory 
+    // );
+
+    // transition_image_layout( 
+    //     texture_image, 
+    //     vk::Format      ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
+    //     vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
+    //     vk::ImageLayout ::eTransferDstOptimal, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+    //     this->mip_levels 
+    // );
+    
+    // //graphics_queue.waitIdle();
+
+    // copy_buffer_to_image( 
+    //     staging_buffer, 
+    //     texture_image, 
+    //     static_cast<uint32_t>( tex_width ),
+    //     static_cast<uint32_t>( tex_height ) 
+    // );
 
     
     //transitionImageLayout( textureImage, VK_FORMAT_R8G8B8A8_SRGB, 
@@ -72,13 +96,13 @@ void BaseApp::create_texture_image() {
     device.destroyBuffer( staging_buffer, nullptr );
     device.freeMemory( staging_buffer_memory, nullptr );
     
-    generate_mipmaps( 
-        texture_image, 
-        vk::Format::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-        tex_width, 
-        tex_height, 
-        mip_levels 
-    );
+    // generate_mipmaps( 
+    //     texture_image, 
+    //     vk::Format::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
+    //     tex_width, 
+    //     tex_height, 
+    //     mip_levels 
+    // );
     
 }
 
@@ -178,12 +202,15 @@ void BaseApp::generate_mipmaps( vk::Image image, vk::Format image_format, int32_
 }
 
 void BaseApp::create_texture_image_view() {
-    texture_image_view = create_image_view( 
-        texture_image, 
-        vk::Format              ::eR8G8B8A8Srgb, 
-        vk::ImageAspectFlagBits ::eColor, 
-        this->mip_levels 
-    );
+    texture.create_view( 
+        vk::ImageAspectFlagBits ::eColor
+     );
+    // texture_image_view = create_image_view( 
+    //     texture_image, 
+    //     vk::Format              ::eR8G8B8A8Srgb, 
+    //     vk::ImageAspectFlagBits ::eColor,
+    //     this->mip_levels 
+    // );
 }
 
 void BaseApp::create_texture_sampler() {

@@ -2,7 +2,12 @@
 
 namespace ec {
 
-    void BaseApp::create_buffer(
+extern uint32_t find_memory_type( vk::PhysicalDevice physical_device, uint32_t type_filter, vk::MemoryPropertyFlags properties );
+
+
+void create_buffer(
+    vk::PhysicalDevice      physical_device,
+    vk::Device              device,
     vk::DeviceSize          size, 
     vk::BufferUsageFlags    usage, 
     vk::MemoryPropertyFlags properties,
@@ -24,13 +29,24 @@ namespace ec {
     vk::MemoryAllocateInfo alloc_info{};
     alloc_info.sType            = vk::StructureType::eMemoryAllocateInfo; //VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize   = mem_requirements.size;
-    alloc_info.memoryTypeIndex  = find_memory_type( mem_requirements.memoryTypeBits, properties );
+    alloc_info.memoryTypeIndex  = find_memory_type( physical_device, mem_requirements.memoryTypeBits, properties );
     
     if( device.allocateMemory( &alloc_info, nullptr, &buffer_memory ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to allocate buffer memory!" );
     }
 
     device.bindBufferMemory( buffer, buffer_memory, 0 );
+}
+
+// Temporary wrapper
+void BaseApp::create_buffer(
+    vk::DeviceSize          size, 
+    vk::BufferUsageFlags    usage, 
+    vk::MemoryPropertyFlags properties,
+    vk::Buffer&             buffer, 
+    vk::DeviceMemory&       buffer_memory
+) {
+    ec::create_buffer( physical_device, device, size, usage, properties, buffer, buffer_memory );
 }
 
 void BaseApp::create_vertex_buffer() {
@@ -126,7 +142,7 @@ void BaseApp::update_uniform_buffer( uint32_t currentImage ) {
     //ubo.model = glm::rotate( glm::mat4(1.0f), time * glm::radians( 90.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
     mvp.model   = glm::identity<glm::mat4>();
     mvp.view    = glm::lookAt( camera.get_pos(), camera.get_pos()+camera.get_dir(), glm::vec3( 0.0f, 0.0f, 1.0f ) );
-    mvp.proj    = glm::perspective( glm::radians( 45.0f ), swapchain_extent.width / static_cast<float>( swapchain_extent.height ), 0.1f, 100.0f );
+    mvp.proj    = glm::perspective( glm::radians( 45.0f ), swapchain_extent.width / static_cast<float>( swapchain_extent.height ), 0.1f, 1000.0f );
     mvp.proj[1][1] *= -1;
 
     std::memcpy( uniform_buffers_mapped[currentImage], &mvp, sizeof( mvp ));

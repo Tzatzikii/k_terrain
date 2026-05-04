@@ -1,7 +1,7 @@
 CXX = g++
 CXXFLAGS = -g -O0 -DX11 -Wall -Wextra -std=c++17 -I src
 
-LDFLAGS = -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi
+LDFLAGS = -L./libs -lglfw -lvulkan -ldl -lpthread -lX11 -lXxf86vm -lXrandr -lXi -lFastNoise
 SRC_DIR = src
 BIN_DIR = bin
 OBJ_DIR = $(BIN_DIR)/obj

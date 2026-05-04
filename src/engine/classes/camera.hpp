@@ -12,7 +12,7 @@ class Camera {
     float speed = 0.01f;
 
 public:
-    Camera( glm::vec3 _pos = {0, 0, 0}, glm::vec3 _dir = {0, 1, 0} )
+    Camera( glm::vec3 _pos = {0, 0, 5.0f}, glm::vec3 _dir = {0, -1.0f, 0} )
         : pos(glm::vec4(_pos, 1)), dir(glm::vec4(_dir, 0)){}
     void forwards( float units );
     void sideways( float units );

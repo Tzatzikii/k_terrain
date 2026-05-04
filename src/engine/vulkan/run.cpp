@@ -150,7 +150,7 @@ private:
         static double py = 0;
         double dx = px-xpos;
         double dy = py-ypos;
-        camera.rotate( static_cast<float>( dx ), static_cast<float>( dy ) );
+        camera.rotate( static_cast<float>( dy/5.0 ), static_cast<float>( dx/5.0 ) );
         px = xpos;
         py = ypos;
     }

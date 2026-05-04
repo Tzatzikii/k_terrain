@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <array>
+#include "../../../libs/FastNoise.h"
 #include "chunk.hpp"
 
 namespace ec {
@@ -39,8 +40,11 @@ private:
     float chunk_size = 10;
     std::array<Chunk, size * size> chunks;
     void generate_chunks() {
+
+        
+
         for( int i = 0; i < size*size; i++ ) {
-            Chunk chunk( glm::vec2{ i/size, i%size }, i );
+            Chunk chunk( glm::vec2{ i/size, i%size }, static_cast<float>(size), i );
             
             this->chunks[i] = chunk;
 

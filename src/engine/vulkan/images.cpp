@@ -66,7 +66,7 @@ void BaseApp::transition_image_layout(
     end_single_time_commands( command_buffer ); 
 }
 
-void BaseApp::create_image( 
+void BaseApp::create_image(
     uint32_t                width, 
     uint32_t                height, 
     uint32_t                mip_levels, 
@@ -103,13 +103,13 @@ void BaseApp::create_image(
     vk::MemoryAllocateInfo alloc_info{};
     alloc_info.sType             = vk::StructureType::eMemoryAllocateInfo; //VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize    = mem_requirements.size;
-    alloc_info.memoryTypeIndex   = find_memory_type( mem_requirements.memoryTypeBits, properties );
+    alloc_info.memoryTypeIndex   = ec::find_memory_type( physical_device, mem_requirements.memoryTypeBits, properties );
 
     if( device.allocateMemory( &alloc_info, nullptr, &image_memory ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to create image memory!" );
     }
 
-    vkBindImageMemory( device, image, image_memory, 0 );
+    device.bindImageMemory( image, image_memory, 0 );
 }
 
 vk::ImageView BaseApp::create_image_view( vk::Image image, vk::Format format, vk::ImageAspectFlags aspect_flags, uint32_t mip_level ) {
