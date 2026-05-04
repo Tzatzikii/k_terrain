@@ -7,7 +7,7 @@ namespace ec {
 
 void BaseApp::create_texture_image() {
     int tex_width, tex_height, tex_channels;
-    stbi_uc * pixels = stbi_load( TEXTURE_PATH.c_str(), &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha );
+    stbi_uc * pixels = stbi_load( "res/textures/grass.jpg", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha );
     vk::DeviceSize image_size = tex_width * tex_height * 4;
     unsigned char* noise_pixels = new unsigned char[image_size];
     //mip_levels = static_cast<uint32_t>( std::floor( std::log2( std::max( tex_width, tex_height ) ) ) ) + 1;
@@ -48,9 +48,13 @@ void BaseApp::create_texture_image() {
     vkUnmapMemory( device, staging_buffer_memory );
 
     vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
-    texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
+    noise_texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
     free(noise_pixels);
-    
+    end_single_time_commands( temp_cmd_buffer );
+
+    temp_cmd_buffer = begin_single_time_commands();
+    texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, pixels, tex_width, tex_height );
+    free(pixels);
     end_single_time_commands( temp_cmd_buffer );
 
     // stbi_image_free( pixels );
@@ -202,9 +206,12 @@ void BaseApp::generate_mipmaps( vk::Image image, vk::Format image_format, int32_
 }
 
 void BaseApp::create_texture_image_view() {
+    noise_texture.create_view( 
+        vk::ImageAspectFlagBits ::eColor
+    );
     texture.create_view( 
         vk::ImageAspectFlagBits ::eColor
-     );
+    );
     // texture_image_view = create_image_view( 
     //     texture_image, 
     //     vk::Format              ::eR8G8B8A8Srgb, 
@@ -237,6 +244,10 @@ void BaseApp::create_texture_sampler() {
     if( device.createSampler( &sampler_info, nullptr, &texture_sampler ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to create texture sampler!" );
     }
+    if( device.createSampler( &sampler_info, nullptr, &noise_sampler ) != vk::Result::eSuccess ) {
+        throw std::runtime_error( "failed to create texture sampler!" );
+    }
+
 
 }
 

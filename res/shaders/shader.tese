@@ -12,7 +12,8 @@ layout(location = 1) in vec2 inTexCoord[];
 
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out float height;
-layout(binding = 1) uniform sampler2D texSampler;
+layout(binding = 1) uniform sampler2D noiseSampler;
+layout(binding = 2) uniform sampler2D texSampler;
 
 
 void main() {
@@ -43,7 +44,7 @@ void main() {
         bary.z * t2;
 
     // lookup texel at patch coordinate for height and scale + shift as desired
-    height = texture(texSampler, texCoord).y * 16.0; //* 64.0 - 16.0;
+    height = texture(noiseSampler, texCoord).y * 16.0; //* 64.0 - 16.0;
 
     // ----------------------------------------------------------------------
     // retrieve control point position coordinates

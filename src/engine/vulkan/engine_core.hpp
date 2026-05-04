@@ -104,6 +104,8 @@ protected:
     vk::DeviceMemory            texture_image_memory;
     vk::ImageView               texture_image_view;
     vk::Sampler                 texture_sampler;
+    vk::Sampler                 noise_sampler;
+    ec::Texture                 noise_texture;
     ec::Texture                 texture;
 
     vk::Image                   noise_image;

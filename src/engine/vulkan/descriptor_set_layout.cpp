@@ -11,16 +11,24 @@ void BaseApp::create_descriptor_set_layout() {
                                               vk::ShaderStageFlagBits::eTessellationEvaluation;//VK_SHADER_STAGE_VERTEX_BIT;
     ubo_layout_binding.pImmutableSamplers   = nullptr;
 
-    vk::DescriptorSetLayoutBinding sampler_layout_binding{};
-    sampler_layout_binding.binding            = 1;
-    sampler_layout_binding.descriptorCount    = 1;
-    sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    sampler_layout_binding.pImmutableSamplers = nullptr;
-    sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
+    vk::DescriptorSetLayoutBinding noise_sampler_layout_binding{};
+    noise_sampler_layout_binding.binding            = 1;
+    noise_sampler_layout_binding.descriptorCount    = 1;
+    noise_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    noise_sampler_layout_binding.pImmutableSamplers = nullptr;
+    noise_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
                                                 vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
 
-    std::array<vk::DescriptorSetLayoutBinding, 2> bindings = {
-        ubo_layout_binding, sampler_layout_binding 
+    vk::DescriptorSetLayoutBinding texture_sampler_layout_binding{};
+    texture_sampler_layout_binding.binding            = 2;
+    texture_sampler_layout_binding.descriptorCount    = 1;
+    texture_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    texture_sampler_layout_binding.pImmutableSamplers = nullptr;
+    texture_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
+                                                 vk::ShaderStageFlagBits::eTessellationEvaluation;
+
+    std::array<vk::DescriptorSetLayoutBinding, 3> bindings = {
+        ubo_layout_binding, noise_sampler_layout_binding, texture_sampler_layout_binding
     };
 
     vk::DescriptorSetLayoutCreateInfo layout_info{};
