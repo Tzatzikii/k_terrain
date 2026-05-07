@@ -95,7 +95,7 @@ void BaseApp::create_swapchain() {
 
     create_info.preTransform    = swapchain_support.capabilities.currentTransform;
     create_info.compositeAlpha  = vk::CompositeAlphaFlagBitsKHR::eOpaque; //VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    create_info.presentMode     = present_mode;
+    create_info.presentMode     = vk::PresentModeKHR::eFifo; // present_mode;
     create_info.clipped         = VK_TRUE;
     create_info.oldSwapchain    = VK_NULL_HANDLE;
 

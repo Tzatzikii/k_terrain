@@ -11,9 +11,10 @@ namespace ec {
 struct vertex {
     glm::vec3 pos;
     glm::vec2 tex_coord;
+    uint32_t chunk_index;
 
     static vk::VertexInputBindingDescription                    get_binding_description();
-    static std::array<vk::VertexInputAttributeDescription, 2>   get_attribute_descriptions();
+    static std::array<vk::VertexInputAttributeDescription, 3>   get_attribute_descriptions();
     
     bool    operator==  ( const vertex& other ) const;
 };

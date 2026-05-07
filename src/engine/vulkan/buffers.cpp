@@ -1,4 +1,5 @@
 #include "engine_core.hpp"
+#include <stdint.h>
 
 namespace ec {
 
@@ -142,7 +143,7 @@ void BaseApp::update_uniform_buffer( uint32_t currentImage ) {
     //ubo.model = glm::rotate( glm::mat4(1.0f), time * glm::radians( 90.0f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
     mvp.model   = glm::identity<glm::mat4>();
     mvp.view    = glm::lookAt( camera.get_pos(), camera.get_pos()+camera.get_dir(), glm::vec3( 0.0f, 0.0f, 1.0f ) );
-    mvp.proj    = glm::perspective( glm::radians( 45.0f ), swapchain_extent.width / static_cast<float>( swapchain_extent.height ), 0.1f, 1000.0f );
+    mvp.proj    = glm::perspective( glm::radians( 45.0f ), swapchain_extent.width / static_cast<float>( swapchain_extent.height ), 0.1f, std::pow(2.0f, 20.0f) );
     mvp.proj[1][1] *= -1;
 
     std::memcpy( uniform_buffers_mapped[currentImage], &mvp, sizeof( mvp ));

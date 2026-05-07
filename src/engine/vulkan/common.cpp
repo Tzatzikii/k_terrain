@@ -101,23 +101,24 @@ vk::Format BaseApp::find_supported_format( const std::vector<vk::Format> & candi
     
 }
 
+
 vk::CommandBuffer BaseApp::begin_single_time_commands() {
-        vk::CommandBufferAllocateInfo alloc_info{};
-        alloc_info.sType = vk::StructureType     ::eCommandBufferAllocateInfo; //VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        alloc_info.level = vk::CommandBufferLevel::ePrimary; //VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        alloc_info.commandPool           = command_pool;
-        alloc_info.commandBufferCount    = 1;
+    vk::CommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = vk::StructureType     ::eCommandBufferAllocateInfo; //VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.level = vk::CommandBufferLevel::ePrimary; //VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandPool           = command_pool;
+    alloc_info.commandBufferCount    = 1;
 
-        vk::CommandBuffer command_buffer;
-        device.allocateCommandBuffers( &alloc_info, &command_buffer );
+    vk::CommandBuffer command_buffer;
+    device.allocateCommandBuffers( &alloc_info, &command_buffer );
 
-        vk::CommandBufferBeginInfo begin_info{};
-        begin_info.sType = vk::StructureType             ::eCommandBufferBeginInfo; //VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit; //VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    vk::CommandBufferBeginInfo begin_info{};
+    begin_info.sType = vk::StructureType             ::eCommandBufferBeginInfo; //VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = vk::CommandBufferUsageFlagBits::eOneTimeSubmit; //VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-        command_buffer.begin( &begin_info );
+    command_buffer.begin( &begin_info );
 
-        return command_buffer;
+    return command_buffer;
 }
 
 void BaseApp::end_single_time_commands( vk::CommandBuffer command_buffer ) {

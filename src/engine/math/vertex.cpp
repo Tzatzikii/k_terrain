@@ -16,9 +16,9 @@ vk::VertexInputBindingDescription vertex::get_binding_description() {
 
 }
 
-std::array<vk::VertexInputAttributeDescription, 2> vertex::get_attribute_descriptions() {
+std::array<vk::VertexInputAttributeDescription, 3> vertex::get_attribute_descriptions() {
     
-    std::array<vk::VertexInputAttributeDescription, 2> attribute_descriptions{};
+    std::array<vk::VertexInputAttributeDescription, 3> attribute_descriptions{};
 
     attribute_descriptions[0].binding = 0;
         attribute_descriptions[0].location = 0;
@@ -29,6 +29,11 @@ std::array<vk::VertexInputAttributeDescription, 2> vertex::get_attribute_descrip
         attribute_descriptions[1].location = 1;
         attribute_descriptions[1].format = vk::Format::eR32G32B32Sfloat;
         attribute_descriptions[1].offset = offsetof( vertex, tex_coord );
+
+        attribute_descriptions[2].binding = 0;
+        attribute_descriptions[2].location = 2;
+        attribute_descriptions[2].format = vk::Format::eR32Uint;
+        attribute_descriptions[2].offset = offsetof( vertex, chunk_index );
 
         return attribute_descriptions;
 }

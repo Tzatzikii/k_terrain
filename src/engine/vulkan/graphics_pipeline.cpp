@@ -211,6 +211,8 @@ void BaseApp::create_graphics_pipeline(
 
     device.destroyShaderModule( frag_shader_module, nullptr );
     device.destroyShaderModule( vert_shader_module, nullptr );
+    device.destroyShaderModule( tese_shader_module, nullptr );
+    device.destroyShaderModule( tesc_shader_module, nullptr );
 
 }
 

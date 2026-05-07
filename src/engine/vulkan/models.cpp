@@ -1,4 +1,7 @@
 #include "engine_core.hpp"
+#include "../classes/chunk_tree.hpp"
+#include <memory>
+
 
 namespace ec {
 
@@ -43,14 +46,11 @@ void BaseApp::load_model( std::string path ) {
         }
     }
 
-    ec::Terrain<15> terrain = {};
-    terrain.generate();
-    std::vector<ec::vertex> terrain_vertices = {};
-    std::vector<uint32_t> terrain_indices = {};
-    terrain.get_model( terrain_vertices, terrain_indices );
-    vertices.insert( vertices.begin(), terrain_vertices.begin(), terrain_vertices.end() );
-    indices.insert( indices.begin(), terrain_indices.begin(), terrain_indices.end() );
+
+    this->chunk_tree = std::make_unique<ec::ChunkTree>( 0, 0, 65536 );
+    chunk_tree->get_geometry( vertices, indices, 0 );
     
+    std::cout << vertices.size() << std::endl;
 }    
 
 void BaseApp::load_models() {

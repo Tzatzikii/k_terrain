@@ -14,7 +14,9 @@
 #include "../math/vertex.hpp"
 #include "../classes/terrain.hpp"
 #include "../classes/camera.hpp"
+#include "../classes/chunk_tree.hpp"
 #include "texture.hpp"
+#include <chrono>
 
 namespace ec {
 
@@ -33,10 +35,26 @@ public:
             const vk::DebugUtilsMessengerCallbackDataEXT* p_callback_data,
             void * p_user_data
     );
-    virtual void key_events() = 0;
+    virtual void key_events( float delta ) = 0;
     virtual void cursor_events( double xpos, double ypos ) = 0;
     void glfw_key_callback( GLFWwindow* window, int key, int scancode, int action, int mods );
     void glfw_cursor_callback( GLFWwindow* window, double xpos, double ypos );
+    vk::Device get_device() const {
+        return device;
+    }
+    vk::PhysicalDevice get_physical_device() const {
+        return physical_device;
+    }
+    vk::CommandBuffer begin_single_time_commands();
+    void end_single_time_commands( vk::CommandBuffer command_buffer );
+    void create_buffer(
+        vk::DeviceSize          size, 
+        vk::BufferUsageFlags    usage, 
+        vk::MemoryPropertyFlags properties,
+        vk::Buffer&             buffer, 
+        vk::DeviceMemory&       buffer_memory
+    );
+
 
 
 protected:
@@ -133,10 +151,13 @@ protected:
     uint32_t                    current_frame = 0;
 
     Camera                      camera = Camera({0, 0, 16.0});
+
+    std::unique_ptr<ChunkTree>  chunk_tree;
     
     std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
 
     bool cursor_enabled         = false;
+
 
     void main_loop();
     void draw_frame();
@@ -208,21 +229,14 @@ protected:
                                     vk::DeviceMemory&         image_memory 
                                 );
 
-    void                        create_buffer(
-                                    vk::DeviceSize          size, 
-                                    vk::BufferUsageFlags    usage, 
-                                    vk::MemoryPropertyFlags properties,
-                                    vk::Buffer&             buffer, 
-                                    vk::DeviceMemory&       buffer_memory
-                                );
+    
 
     vk::Format                  find_supported_format( const std::vector<vk::Format> & candidates, vk::ImageTiling tiling, vk::FormatFeatureFlags features );
     vk::Format                  find_depth_format();
 
     vk::ShaderModule            create_shader_module( const std::vector<char>& code );
 
-    vk::CommandBuffer begin_single_time_commands();
-    void end_single_time_commands( vk::CommandBuffer command_buffer );
+   
     void copy_buffer_to_image( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height );
     void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
     void generate_mipmaps( vk::Image image, vk::Format image_format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels );

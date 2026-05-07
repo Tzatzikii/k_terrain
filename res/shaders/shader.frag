@@ -10,7 +10,8 @@ layout(binding = 2) uniform sampler2D texSampler;
 
 
 void main() {
-    float scale = 1.0/16.0;
-    float h = height * scale;
+    float scale = 1.0/32.0;
+    float h = 1 - height * scale;
+    // outColor = vec4(.5, .5, .5, 1.0);
     outColor = texture(texSampler, fragTexCoord);
 }

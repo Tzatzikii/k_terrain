@@ -2,8 +2,10 @@
 
 namespace ec {
 
+
+
 void BaseApp::create_command_pool() {
-    //ec::QueueFamilyIndices q_family_indices = find_queue_families( physical_device );
+    ec::QueueFamilyIndices q_family_indices = find_queue_families( physical_device );
 
     vk::CommandPoolCreateInfo pool_info{};
     pool_info.sType = vk::StructureType             ::eCommandPoolCreateInfo; //VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

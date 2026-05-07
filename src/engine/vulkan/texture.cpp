@@ -16,31 +16,25 @@ extern void create_buffer(
 );
 
 Texture::Texture( 
-    vk::PhysicalDevice& _physical_device, 
-    vk::Device&         _device, 
-    vk::CommandBuffer&  _cmd_buffer, 
-    vk::Buffer&         _staging_buffer,
+    BaseApp*            _current_app,
     std::string         _path 
 )
-    : physical_device( _physical_device ), device( _device )
+    : current_app(_current_app), physical_device( _current_app->get_physical_device() ), device( _current_app->get_device() )
 {
     auto pixels = load_image( _path );
-    create_vk( pixels, _cmd_buffer, _staging_buffer );
+    create_vk( pixels );
     stbi_image_free( pixels ); 
 }
 
 Texture::Texture( 
-    vk::PhysicalDevice& _physical_device, 
-    vk::Device&         _device, 
-    vk::CommandBuffer&  _cmd_buffer, 
-    vk::Buffer&         _staging_buffer,
+    BaseApp*            _current_app,
     unsigned char*      _pixels, 
     int                 _width, 
     int                 _height 
 )
-    : physical_device( _physical_device ), device( _device ), width( _width), height( _height )
+    : current_app(_current_app), physical_device( _current_app->get_physical_device() ), device( _current_app->get_device() ), width(_width), height(_height)
 {
-    create_vk( _pixels, _cmd_buffer, _staging_buffer);
+    create_vk( _pixels);
 }
 
 stbi_uc* Texture::load_image( std::string _path ) {
@@ -53,14 +47,25 @@ stbi_uc* Texture::load_image( std::string _path ) {
     }
 }
 
-void Texture::create_vk( stbi_uc* _pixels, vk::CommandBuffer& _cmd_buffer, vk::Buffer& _staging_buffer ) {
+void Texture::create_vk( stbi_uc* _pixels ) {
+
+    vk::CommandBuffer cmd_buffer = current_app->begin_single_time_commands();
 
     vk::DeviceSize image_size = width * height * 4;
-    
-    // void * data;
-    // vkMapMemory( device, staging_buffer_memory, 0, image_size, 0, &data );
-    // std::memcpy( data, _pixels, static_cast<size_t>( image_size ) );
-    // vkUnmapMemory( device, staging_buffer_memory );
+    vk::Buffer staging_buffer;
+    vk::DeviceMemory staging_buffer_memory;
+    current_app->create_buffer(
+        image_size, 
+        vk::BufferUsageFlagBits::eTransferSrc,
+        vk::MemoryPropertyFlagBits::eHostCoherent,
+        staging_buffer,
+        staging_buffer_memory
+    );
+
+    void * data;
+    device.mapMemory( staging_buffer_memory, 0, image_size, {}, &data );
+    std::memcpy( data, _pixels, static_cast<size_t>( image_size ) );
+
 
     ImageProperties properties{
         width, 
@@ -84,20 +89,20 @@ void Texture::create_vk( stbi_uc* _pixels, vk::CommandBuffer& _cmd_buffer, vk::B
     );
 
     image.transition_layout(
-        _cmd_buffer,
+        cmd_buffer,
         vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
         vk::ImageLayout ::eTransferDstOptimal //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
     );
 
     image.copy_from_buffer(
-        _cmd_buffer,
-        _staging_buffer,
+        cmd_buffer,
+        staging_buffer,
         static_cast<uint32_t>( width ),
         static_cast<uint32_t>( height ) 
     );
 
     image.transition_layout(
-        _cmd_buffer,
+        cmd_buffer,
         vk::ImageLayout::eTransferDstOptimal,
         vk::ImageLayout::eShaderReadOnlyOptimal
     );
@@ -112,7 +117,9 @@ void Texture::create_vk( stbi_uc* _pixels, vk::CommandBuffer& _cmd_buffer, vk::B
     
     //transitionImageLayout( textureImage, VK_FORMAT_R8G8B8A8_SRGB, 
     //    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, this->mipLevels );
-    
+    current_app->end_single_time_commands( cmd_buffer );
+    device.destroyBuffer(staging_buffer);
+    device.freeMemory(staging_buffer_memory);
 }
 
 

@@ -17,6 +17,7 @@ void BaseApp::create_texture_image() {
     }
 
     FastNoise noise{};
+    noise.SetNoiseType( FastNoise::NoiseType::Perlin );
     float scale = 2.0f/256.0f;
     int index = 0;
     for( int x = 0; x < tex_width; x++ ) {
@@ -31,83 +32,42 @@ void BaseApp::create_texture_image() {
     }
     
 
-    vk::Buffer staging_buffer;
-    vk::DeviceMemory staging_buffer_memory;
+    // vk::Buffer staging_buffer;
+    // vk::DeviceMemory staging_buffer_memory;
+    // vk::Buffer noise_staging_buffer;
+    // vk::DeviceMemory noise_staging_buffer_memory;
 
-    create_buffer( 
-        image_size, 
-        vk::BufferUsageFlagBits     ::eTransferSrc, //VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-        vk::MemoryPropertyFlagBits  ::eHostCoherent, //VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
-        staging_buffer, 
-        staging_buffer_memory 
-    );
-    
-    void * data;
-    vkMapMemory( device, staging_buffer_memory, 0, image_size, 0, &data );
-    std::memcpy( data, pixels, static_cast<size_t>( image_size ) );
-    vkUnmapMemory( device, staging_buffer_memory );
-
-    vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
-    noise_texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
-    free(noise_pixels);
-    end_single_time_commands( temp_cmd_buffer );
-
-    temp_cmd_buffer = begin_single_time_commands();
-    texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, pixels, tex_width, tex_height );
-    free(pixels);
-    end_single_time_commands( temp_cmd_buffer );
-
-    // stbi_image_free( pixels );
-    
-    // create_image( 
-    //     tex_width, 
-    //     tex_height, 
-    //     this->mip_levels, 
-    //     vk::SampleCountFlagBits ::e1, //VK_SAMPLE_COUNT_1_BIT, 
-    //     vk::Format              ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-    //     vk::ImageTiling         ::eOptimal, //VK_IMAGE_TILING_OPTIMAL,
-
-    //     vk::ImageUsageFlagBits  ::eTransferDst  | // VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
-    //     vk::ImageUsageFlagBits  ::eSampled      | // VK_IMAGE_USAGE_SAMPLED_BIT      | 
-    //     vk::ImageUsageFlagBits  ::eTransferSrc,   // VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-
-    //     vk::MemoryPropertyFlagBits::eDeviceLocal, //VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-    //     texture_image, 
-    //     texture_image_memory 
-    // );
-
-    // transition_image_layout( 
-    //     texture_image, 
-    //     vk::Format      ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-    //     vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
-    //     vk::ImageLayout ::eTransferDstOptimal, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
-    //     this->mip_levels 
-    // );
-    
-    // //graphics_queue.waitIdle();
-
-    // copy_buffer_to_image( 
+    // create_buffer( 
+    //     image_size, 
+    //     vk::BufferUsageFlagBits     ::eTransferSrc, //VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+    //     vk::MemoryPropertyFlagBits  ::eHostCoherent, //VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
     //     staging_buffer, 
-    //     texture_image, 
-    //     static_cast<uint32_t>( tex_width ),
-    //     static_cast<uint32_t>( tex_height ) 
+    //     staging_buffer_memory 
     // );
+    
+    
 
-    
-    //transitionImageLayout( textureImage, VK_FORMAT_R8G8B8A8_SRGB, 
-    //    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, this->mipLevels );
-    
-    device.destroyBuffer( staging_buffer, nullptr );
-    device.freeMemory( staging_buffer_memory, nullptr );
-    
-    // generate_mipmaps( 
-    //     texture_image, 
-    //     vk::Format::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-    //     tex_width, 
-    //     tex_height, 
-    //     mip_levels 
-    // );
-    
+    // void * data_2;
+    // device.mapMemory( noise_staging_buffer_memory, 0, noise_image_size, {}, &data_2 );
+    // std::memcpy( data_2, pixels, static_cast<size_t>( noise_image_size ) );
+    //vkUnmapMemory( device, staging_buffer_memory );
+
+    //vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
+    chunk_tree->generate_noise_textures( this );
+    //noise_texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
+    free(noise_pixels);
+    //end_single_time_commands( temp_cmd_buffer );
+
+    //temp_cmd_buffer = begin_single_time_commands();
+    texture = Texture( this, pixels, tex_width, tex_height );
+    free(pixels);
+    //end_single_time_commands( temp_cmd_buffer );
+
+    //chunk_tree->set_textures( texture );
+
+    // device.destroyBuffer( staging_buffer, nullptr );
+    // device.freeMemory( staging_buffer_memory, nullptr );
+
 }
 
 void BaseApp::generate_mipmaps( vk::Image image, vk::Format image_format, int32_t tex_width, int32_t tex_height, uint32_t mip_levels ) {
@@ -206,9 +166,9 @@ void BaseApp::generate_mipmaps( vk::Image image, vk::Format image_format, int32_
 }
 
 void BaseApp::create_texture_image_view() {
-    noise_texture.create_view( 
-        vk::ImageAspectFlagBits ::eColor
-    );
+    // noise_texture.create_view( 
+    //     vk::ImageAspectFlagBits ::eColor
+    // );
     texture.create_view( 
         vk::ImageAspectFlagBits ::eColor
     );
@@ -225,9 +185,9 @@ void BaseApp::create_texture_sampler() {
     sampler_info.sType          = vk::StructureType     ::eSamplerCreateInfo; //VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     sampler_info.magFilter      = vk::Filter            ::eLinear, //VK_FILTER_LINEAR;
     sampler_info.minFilter      = vk::Filter            ::eLinear, //VK_FILTER_LINEAR;
-    sampler_info.addressModeU   = vk::SamplerAddressMode::eRepeat,//VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeV   = vk::SamplerAddressMode::eRepeat, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeW   = vk::SamplerAddressMode::eRepeat, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeU   = vk::SamplerAddressMode::eClampToEdge,//VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV   = vk::SamplerAddressMode::eClampToEdge, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeW   = vk::SamplerAddressMode::eClampToEdge, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
     sampler_info.anisotropyEnable = VK_TRUE;
 
     vk::PhysicalDeviceProperties properties = physical_device.getProperties();

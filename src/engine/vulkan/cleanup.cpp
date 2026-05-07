@@ -3,6 +3,7 @@
 namespace ec {
 
 void BaseApp::cleanup_swapchain() {
+    
     device.destroyImageView( color_image_view, nullptr );
     device.destroyImage( color_image, nullptr );
     device.freeMemory( color_image_memory, nullptr );
@@ -11,6 +12,7 @@ void BaseApp::cleanup_swapchain() {
     device.freeMemory( depth_image_memory, nullptr );
     device.destroyImage( shadow_depth_image, nullptr );
     device.freeMemory( shadow_depth_image_memory, nullptr );
+    
 
 
     for( auto framebuffer : swapchain_framebuffers ) {
@@ -27,11 +29,16 @@ void BaseApp::cleanup_swapchain() {
 void BaseApp::cleanup() {
     cleanup_swapchain();
 
-    device.destroySampler( texture_sampler, nullptr );
-    device.destroyImageView( texture_image_view, nullptr );
+    texture.clean();
+    chunk_tree->clean();
+    //noise_texture.clean();
 
-    device.destroyImage( texture_image, nullptr );
-    device.freeMemory( texture_image_memory, nullptr );
+    device.destroySampler( texture_sampler, nullptr );
+    device.destroySampler( noise_sampler, nullptr );
+    //device.destroyImageView( texture_image_view, nullptr );
+
+   // device.destroyImage( texture_image, nullptr );
+   // device.freeMemory( texture_image_memory, nullptr );
 
 
     for( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ ) {

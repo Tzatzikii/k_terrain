@@ -1,6 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "engine_core.hpp"
+#include <chrono>
 
 namespace ec {
 
@@ -14,6 +15,7 @@ void BaseApp::init_vulkan() {
     create_swapchain();
     create_image_views();
     create_render_pass();
+    load_models();
     create_descriptor_set_layout();
     create_graphics_pipeline();
     create_color_resources();
@@ -23,7 +25,6 @@ void BaseApp::init_vulkan() {
     create_texture_image();
     create_texture_image_view();
     create_texture_sampler();
-    load_models();
     create_vertex_buffer();
     create_index_buffer();
     create_uniform_buffers();
@@ -103,10 +104,20 @@ void BaseApp::draw_frame() {
 }
 
 void BaseApp::main_loop() {
+
+    static auto prev = std::chrono::high_resolution_clock::now();
+    
+    
     while( !glfwWindowShouldClose(window) ) {
+        auto now = std::chrono::high_resolution_clock::now();
+        auto delta = now-prev;
+        float dt = delta.count();
+
         glfwPollEvents();
-        key_events();
+        key_events( dt/1000.0f );
         draw_frame();
+
+        prev = now;
     }
 
     device.waitIdle();
@@ -130,18 +141,21 @@ public:
 
 private:
 
-    void key_events() override {
+    void key_events( float dt ) override {
+        dt /= 1000.0f;
+
+        float speed = 10.0f*dt;
         if( keys_pressed[ GLFW_KEY_W ] ) {
-            camera.forwards(1.0f);
+            camera.forwards(speed);
         }
         if( keys_pressed[ GLFW_KEY_S ] ) {
-            camera.forwards(-1.0f);
+            camera.forwards(-speed);
         }
         if( keys_pressed[ GLFW_KEY_A ] ) {
-            camera.sideways(-1.0f);
+            camera.sideways(-speed);
         }
         if( keys_pressed[ GLFW_KEY_D ] ) {
-            camera.sideways(1.0f);
+            camera.sideways(speed);
         }
     }
 
