@@ -53,6 +53,7 @@ void BaseApp::create_texture_image() {
     //vkUnmapMemory( device, staging_buffer_memory );
 
     //vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
+    //chunk_tree->update( this );
     chunk_tree->generate_noise_textures( this );
     //noise_texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
     free(noise_pixels);
@@ -183,11 +184,12 @@ void BaseApp::create_texture_image_view() {
 void BaseApp::create_texture_sampler() {
     vk::SamplerCreateInfo sampler_info{};
     sampler_info.sType          = vk::StructureType     ::eSamplerCreateInfo; //VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    sampler_info.magFilter      = vk::Filter            ::eLinear, //VK_FILTER_LINEAR;
-    sampler_info.minFilter      = vk::Filter            ::eLinear, //VK_FILTER_LINEAR;
-    sampler_info.addressModeU   = vk::SamplerAddressMode::eClampToEdge,//VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeV   = vk::SamplerAddressMode::eClampToEdge, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    sampler_info.addressModeW   = vk::SamplerAddressMode::eClampToEdge, //VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.magFilter      = vk::Filter            ::eLinear; //VK_FILTER_LINEAR;
+    sampler_info.minFilter      = vk::Filter            ::eLinear; //VK_FILTER_LINEAR;
+    sampler_info.addressModeU   = vk::SamplerAddressMode::eClampToEdge;//VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeV   = vk::SamplerAddressMode::eClampToEdge; //VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.addressModeW   = vk::SamplerAddressMode::eClampToEdge; //VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sampler_info.mipmapMode     = vk::SamplerMipmapMode ::eNearest;
     sampler_info.anisotropyEnable = VK_TRUE;
 
     vk::PhysicalDeviceProperties properties = physical_device.getProperties();

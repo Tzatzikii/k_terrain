@@ -14,7 +14,7 @@ void BaseApp::create_instance() {
     appInfo.applicationVersion  = VK_MAKE_VERSION(APP_MAJOR_VERSION, APP_MINOR_VERSION, APP_PATCH_VERSION);
     appInfo.pEngineName         = ENGINE_NAME.c_str();
     appInfo.engineVersion       = VK_MAKE_VERSION(ENGINE_MAJOR_VERSION, ENGINE_MINOR_VERSION, ENGINE_PATCH_VERSION);
-    appInfo.apiVersion          = VK_API_VERSION_1_0;
+    appInfo.apiVersion          = VK_API_VERSION_1_2;
     
     vk::InstanceCreateInfo createInfo{};
     createInfo.sType            = vk::StructureType::eInstanceCreateInfo; //VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

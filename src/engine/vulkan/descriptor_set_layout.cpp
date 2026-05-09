@@ -18,7 +18,7 @@ void BaseApp::create_descriptor_set_layout() {
     noise_sampler_layout_binding.pImmutableSamplers = nullptr;
     noise_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
                                                 vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
-
+                                                
     vk::DescriptorSetLayoutBinding texture_sampler_layout_binding{};
     texture_sampler_layout_binding.binding            = 2;
     texture_sampler_layout_binding.descriptorCount    = 1;

@@ -47,7 +47,8 @@ void BaseApp::load_model( std::string path ) {
     }
 
 
-    this->chunk_tree = std::make_unique<ec::ChunkTree>( 0, 0, 65536 );
+    this->chunk_tree = std::make_unique<ec::ChunkTree>( 0, 0, 1024 );
+    //chunk_tree->update( this );
     chunk_tree->get_geometry( vertices, indices, 0 );
     
     std::cout << vertices.size() << std::endl;
@@ -58,6 +59,10 @@ void BaseApp::load_models() {
     for( std::string path : model_paths ) {
         load_model( path );
     }
+
+}
+
+void BaseApp::update_terrain() {
 
 }
 

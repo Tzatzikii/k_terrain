@@ -37,10 +37,17 @@ void BaseApp::create_logical_device() {
     else {
         create_info.enabledLayerCount = 0;
     }
+    vk::PhysicalDeviceDescriptorIndexingFeatures indexing_features{};
+    indexing_features.sType = vk::StructureType::ePhysicalDeviceDescriptorIndexingFeatures;
+    indexing_features.shaderSampledImageArrayNonUniformIndexing = vk::True;
+    indexing_features.descriptorBindingPartiallyBound = vk::True;
+
+    create_info.pNext = &indexing_features;
     
     if( physical_device.createDevice( &create_info, nullptr, &device ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to create logical devices!" );
     } 
+
     
     device.getQueue( indices.graphics_family.value(), 0, &graphics_queue );
     device.getQueue( indices.present_family.value(),  0, &present_queue  );

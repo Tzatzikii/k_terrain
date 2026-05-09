@@ -78,7 +78,8 @@ void Image2D::transition_layout( vk::CommandBuffer& _cmd_buffer, vk::ImageLayout
         barrier.dstAccessMask = vk::AccessFlagBits::eShaderRead; //VK_ACCESS_SHADER_READ_BIT;
         
         source_stage        = vk::PipelineStageFlagBits::eTransfer; //VK_PIPELINE_STAGE_TRANSFER_BIT;
-        destination_stage   = vk::PipelineStageFlagBits::eFragmentShader; //VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+        destination_stage   = vk::PipelineStageFlagBits::eFragmentShader | 
+                              vk::PipelineStageFlagBits::eTessellationEvaluationShader; //VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
     else {
         throw std::invalid_argument( "unsupported layout transition!" );
@@ -102,7 +103,7 @@ void Image2D::create_view( vk::ImageAspectFlags _aspect_flags ) {
     view_info.format    = this->properties.format;
     view_info.subresourceRange.aspectMask       = _aspect_flags;
     view_info.subresourceRange.baseMipLevel     = 0;
-    view_info.subresourceRange.levelCount       = properties.mip_levels;
+    view_info.subresourceRange.levelCount       = 1;//properties.mip_levels;
     view_info.subresourceRange.baseArrayLayer   = 0;
     view_info.subresourceRange.layerCount       = 1;
     
@@ -114,8 +115,8 @@ void Image2D::create_view( vk::ImageAspectFlags _aspect_flags ) {
 void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer, uint32_t width, uint32_t height ) {    
     vk::BufferImageCopy region{};
     region.bufferOffset         = 0;
-    region.bufferRowLength      = 0;
-    region.bufferImageHeight    = 0;
+    region.bufferRowLength      = width;
+    region.bufferImageHeight    = height;
     
     region.imageSubresource.aspectMask      = vk::ImageAspectFlagBits::eColor; //VK_IMAGE_ASPECT_COLOR_BIT;
     region.imageSubresource.mipLevel        = 0;

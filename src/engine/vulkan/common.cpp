@@ -106,7 +106,7 @@ vk::CommandBuffer BaseApp::begin_single_time_commands() {
     vk::CommandBufferAllocateInfo alloc_info{};
     alloc_info.sType = vk::StructureType     ::eCommandBufferAllocateInfo; //VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     alloc_info.level = vk::CommandBufferLevel::ePrimary; //VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    alloc_info.commandPool           = command_pool;
+    alloc_info.commandPool           = this->command_pool;
     alloc_info.commandBufferCount    = 1;
 
     vk::CommandBuffer command_buffer;

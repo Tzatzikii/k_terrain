@@ -12,6 +12,8 @@ layout(binding = 2) uniform sampler2D texSampler;
 void main() {
     float scale = 1.0/32.0;
     float h = 1 - height * scale;
-    // outColor = vec4(.5, .5, .5, 1.0);
+    float c = height * 0.001;
+    //outColor = vec4(c, c, c, 1.0);
+    //outColor = vec4(fragTexCoord, 0.0, 1.0);
     outColor = texture(texSampler, fragTexCoord);
 }

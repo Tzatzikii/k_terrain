@@ -115,6 +115,7 @@ void BaseApp::main_loop() {
 
         glfwPollEvents();
         key_events( dt/1000.0f );
+        //chunk_tree->update( this );
         draw_frame();
 
         prev = now;
@@ -144,7 +145,7 @@ private:
     void key_events( float dt ) override {
         dt /= 1000.0f;
 
-        float speed = 10.0f*dt;
+        float speed = 1.0f*dt;
         if( keys_pressed[ GLFW_KEY_W ] ) {
             camera.forwards(speed);
         }

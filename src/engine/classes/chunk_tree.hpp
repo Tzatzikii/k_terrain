@@ -14,7 +14,7 @@ class BaseApp;
 
 class ChunkTree {
 private:
-    std::unique_ptr<ChunkTree> subdivide[4] = {nullptr};
+    std::unique_ptr<ChunkTree> children[4] = {nullptr};
     int64_t max = INT64_MAX;
     int64_t min = INT64_MIN;
     static const int64_t recursion_limit = 20;
@@ -38,6 +38,8 @@ public:
     void generate_noise_textures(
         BaseApp* _current_app
     );
+    void update( BaseApp* _current_app );
+    void subdivide();
     void clean();
 };
 

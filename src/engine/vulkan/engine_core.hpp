@@ -55,6 +55,10 @@ public:
         vk::DeviceMemory&       buffer_memory
     );
 
+    glm::vec3 get_camera_pos() {
+        return camera.get_pos();
+    }
+
 
 
 protected:
@@ -80,7 +84,10 @@ protected:
     vk::SurfaceKHR              surface;
     vk::Queue                   present_queue;
 
-    std::vector<const char*>    device_extensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    std::vector<const char*>    device_extensions = 
+    { 
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+    };
     
     vk::SwapchainKHR            swapchain;
     std::vector<vk::Image>      swapchain_images;
@@ -150,7 +157,7 @@ protected:
 
     uint32_t                    current_frame = 0;
 
-    Camera                      camera = Camera({0, 0, 16.0});
+    Camera                      camera = Camera({0, 0, 0.0});
 
     std::unique_ptr<ChunkTree>  chunk_tree;
     
@@ -241,7 +248,8 @@ protected:
     void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
     void generate_mipmaps( vk::Image image, vk::Format image_format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels );
     void update_uniform_buffer( uint32_t currentImage );
-
+    void update_terrain();   
+    void update_vertex_buffer();
 
     static bool check_validation_layer_support();
     static void framebuffer_resize_callback( GLFWwindow * window, int width, int height ) {
