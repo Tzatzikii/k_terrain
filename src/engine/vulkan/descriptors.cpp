@@ -7,7 +7,7 @@ void BaseApp::create_descriptor_pool() {
     pool_sizes[0].type              = vk::DescriptorType::eUniformBuffer; //VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT );
     pool_sizes[1].type              = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pool_sizes[1].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT * chunk_tree->get_tree_size() );
+    pool_sizes[1].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT * chunk_tree->get_leaf_count() );
     pool_sizes[2].type              = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[2].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT );
 
@@ -48,7 +48,7 @@ void BaseApp::create_descriptor_sets() {
 
         std::vector<vk::ImageView> noise_views = {};
         chunk_tree->get_noise_views( noise_views );
-        std::vector<vk::DescriptorImageInfo> noise_images( chunk_tree->get_tree_size() );
+        std::vector<vk::DescriptorImageInfo> noise_images( chunk_tree->get_leaf_count() );
         for( int i = 0; i < noise_images.size(); i++ ) {
             auto& image_info = noise_images[i];
             image_info.imageLayout  = vk::ImageLayout::eShaderReadOnlyOptimal; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

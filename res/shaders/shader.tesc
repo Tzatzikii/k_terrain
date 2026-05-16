@@ -18,10 +18,10 @@ void main() {
     if (gl_InvocationID == 0) {
         out_chunk_index = in_chunk_index[0];
         // Outer edges
-        gl_TessLevelOuter[0] = tessLevel;
-        gl_TessLevelOuter[1] = tessLevel;
-        gl_TessLevelOuter[2] = tessLevel;
-        gl_TessLevelOuter[3] = tessLevel;
+        gl_TessLevelOuter[0] = 16;
+        gl_TessLevelOuter[1] = 16;
+        gl_TessLevelOuter[2] = 16;
+        gl_TessLevelOuter[3] = 8;
 
         // Inner (for triangles, only [0] is used)
         gl_TessLevelInner[0] = tessLevel;

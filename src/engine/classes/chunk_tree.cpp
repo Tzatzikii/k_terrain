@@ -5,45 +5,47 @@
 
 namespace ec {
 
-uint64_t ChunkTree::id_tracker = 0;
+struct NodeInfo {
+    uint32_t index;
+    bool tess_edges[4];
+};
 
-ChunkTree::ChunkTree( int64_t _cx, int64_t _cy, uint64_t _size, int64_t _level, uint32_t _id ) 
+uint64_t QuadTree::id_tracker = 0;
+
+QuadTree::QuadTree( int64_t _cx, int64_t _cy, uint64_t _size, int64_t _level, uint32_t _id ) 
     : cx(_cx), cy(_cy), size(_size), level(_level), id(_id)
 {
-
-    // Temporary magic number just to try out. 0 will be replaced with the player's position
-    int64_t posx = 0;
-    int64_t posy = 0;
-    int64_t dx = std::abs(posx - cx);
-    int64_t dy = std::abs(posy - cy);
-    int64_t dist = std::sqrt( dx*dx + dy*dy );
-    //int64_t subdivide_dist = 65536/(std::pow(2,level)); == size
-    if(_level >= ChunkTree::recursion_limit || _size <= ChunkTree::min_size || ( dist > size*4 ) ) {
-        id = id_tracker++;
-        tree_size = 1;
-        return;
-    }
-    this->subdivide();
+    
 }  
 
-void ChunkTree::subdivide() {
+void QuadTree::subdivide( glm::vec3 _eye_pos ) {
     int index = 0;
     for( int i = -1; i <= 1; i+=2 ) {
         for( int j = -1; j <= 1; j+=2 ) {
+            //auto next = create_child(i, j);
             int64_t next_cx = cx+i*static_cast<int64_t>(size/4);
             int64_t next_cy = cy+j*static_cast<int64_t>(size/4);
             int64_t next_size = size/2;
-            std::unique_ptr<ChunkTree> next = std::make_unique<ChunkTree>( next_cx, next_cy, next_size, level+1 );
-            tree_size += next->tree_size;
+            std::unique_ptr<QuadTree> next = std::make_unique<QuadTree>( next_cx, next_cy, next_size, level+1 );
             std::swap( children[index++], next );
         }
     } 
 }
 
-void ChunkTree::get_geometry( std::vector<vertex>& _vertices, std::vector<uint32_t>& _indices, uint32_t _n ) {
+std::unique_ptr<QuadTree> QuadTree::create_child( int _local_i, int _local_j ) {
+
+    int64_t next_cx = cx+_local_i*static_cast<int64_t>(size/4);
+    int64_t next_cy = cy+_local_j*static_cast<int64_t>(size/4);
+    int64_t next_size = size/2;
+    std::unique_ptr<QuadTree> next = std::make_unique<QuadTree>( next_cx, next_cy, next_size, level+1 );
+    return next;
+    
+}   
+
+void QuadTree::get_geometry( std::vector<vertex>& _vertices, std::vector<uint32_t>& _indices, uint32_t _n ) {
     if( this->children[0] == nullptr ) {
 
-        glm::vec3 center = glm::vec3( static_cast<float>( this->cx ), static_cast<float>( this->cy), 0 );
+        glm::vec3 center = glm::vec3( static_cast<float>( this->cx ), static_cast<float>( this->cy ), 0 );
         float size = static_cast<float>( this->size );
 
         uint32_t id = this->id;
@@ -69,8 +71,8 @@ void ChunkTree::get_geometry( std::vector<vertex>& _vertices, std::vector<uint32
 
 }
 
-void ChunkTree::get_noise_views( std::vector<vk::ImageView>& _views ) {
-    if( this->children[0] == nullptr ) {
+void QuadTree::get_noise_views( std::vector<vk::ImageView>& _views ) {
+    if( this->is_leaf() ) {
         _views.push_back( noise_texture.get_view() );
     }
     else {
@@ -81,8 +83,8 @@ void ChunkTree::get_noise_views( std::vector<vk::ImageView>& _views ) {
     }
 }
 
-void ChunkTree::set_textures( Texture& _texture ) {
-    if( this->children[0] == nullptr ) {
+void QuadTree::set_textures( Texture& _texture ) {
+    if( this->is_leaf() ) {
         this->noise_texture = _texture;
         this->noise_texture.create_view( vk::ImageAspectFlagBits::eColor );
     }
@@ -94,42 +96,84 @@ void ChunkTree::set_textures( Texture& _texture ) {
     }
 }
 
-void ChunkTree::update( BaseApp* _current_app ) {
-    glm::vec3 pos = _current_app->get_camera_pos();
+void QuadTree::update( glm::vec3 _eye_pos ) {
+    bool changed = false;
+    glm::vec3 pos = _eye_pos;
  
     float dx = std::abs(pos.x - cx);
     float dy = std::abs(pos.y - cy);
     float dist = std::sqrt( dx*dx + dy*dy );
-    float threshold = size * 4;
+   // float threshold = size * 4;
 
-
-    for( int i = 0; i < 4; i++ ) {
-        if( dist > threshold && children[i] != nullptr ) {
-            children[i]->clean();
-            children[i].release();
-        }
-    } 
-    if( this->level >= ChunkTree::recursion_limit || this->size <= ChunkTree::min_size || ( dist > threshold ) ) {
-        id = id_tracker++;
-        tree_size = 1;
+    if( !this->is_divisible( dist ) ) {
+        this->make_leaf();
+        
         return;
     }
-    this->subdivide();
-    for( int i = 0; i < 4; i++ ) {
-        if( children[i] != nullptr ) {
-            children[i]->update( _current_app );           
-        }
-    } 
+    this->subdivide( pos );
+    this->update_children( pos );
+    this->update_tree_size();
 }
 
-void ChunkTree::generate_noise_textures( 
+void QuadTree::update_tree_size() {
+    if( this->has_children() ) {
+        leaf_count = 0;
+        for( auto& child : children ) {
+            child->update_tree_size();
+            leaf_count += child->leaf_count;
+        }
+    }
+    // if a chunk doesn't have children it is a leaf, in
+    // which case the ChunkTree::make_leaf function assigns
+    // a leaf_count of 1, so no need to handle that again
+}
+
+void QuadTree::update_children( glm::vec3 _eye_pos ) {
+    if( this->is_leaf() ) {
+        return;
+    }
+    for( auto& child : children ) {
+        child->update( _eye_pos );
+    }
+    std::cout << "made leaf, coords: " << cx << " : " << cy << std::endl;
+}
+
+void QuadTree::delete_children() {
+
+    if( !this->has_children() ) {
+        return;
+    }
+
+    for( int i = 0; i < 4; i++ ) {
+        children[i]->clean();
+        children[i].release();
+    } 
+
+}
+
+void QuadTree::make_leaf() {
+
+    this->delete_children();
+    id = id_tracker++;
+    leaf_count = 1;
+
+}
+
+
+
+void QuadTree::generate_noise_textures( 
         ec::BaseApp* _current_app
 ) { 
-    if( children[0] != nullptr) {
+    //if( !updated ) return;
+    if( this->has_children() ) {
         this->children[0]->generate_noise_textures( _current_app );
         this->children[1]->generate_noise_textures( _current_app );
         this->children[2]->generate_noise_textures( _current_app );
         this->children[3]->generate_noise_textures( _current_app );
+        return;
+    }
+
+    if( noise_texture.get_view() != VK_NULL_HANDLE ) {
         return;
     }
 
@@ -142,7 +186,7 @@ void ChunkTree::generate_noise_textures(
     noise.SetFractalOctaves(9.0f);
     noise.SetFractalLacunarity(1.8f);
     noise.SetFractalGain(0.5f);
-    noise.SetSeed( ChunkTree::seed );
+    noise.SetSeed( QuadTree::seed );
     float center_x = static_cast<float>(cx);
     float center_y = static_cast<float>(cy);
     float size_f = static_cast<float>(size);
@@ -170,7 +214,7 @@ void ChunkTree::generate_noise_textures(
                 pixels[index++] = 255;
         }
     }
-    //std::memset( pixels, static_cast<char>(0), noise_size * noise_size * 4);
+    std::memset( pixels, static_cast<char>(0), noise_size * noise_size * 4);
 
     noise_texture = Texture( _current_app, pixels, noise_size, noise_size );
     noise_texture.create_view( vk::ImageAspectFlagBits::eColor );
@@ -180,7 +224,7 @@ void ChunkTree::generate_noise_textures(
 
 }
 
-void ChunkTree::clean() {
+void QuadTree::clean() {
     if( this->children[0] == nullptr ) {
         noise_texture.clean();
     }

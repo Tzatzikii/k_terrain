@@ -14,6 +14,7 @@ void main() {
     float h = 1 - height * scale;
     float c = height * 0.001;
     //outColor = vec4(c, c, c, 1.0);
+    outColor = vec4(.5, .5, .5, 1.0);
     //outColor = vec4(fragTexCoord, 0.0, 1.0);
-    outColor = texture(texSampler, fragTexCoord);
+    //outColor = texture(texSampler, fragTexCoord);
 }

@@ -30,7 +30,7 @@ void BaseApp::cleanup() {
     cleanup_swapchain();
 
     texture.clean();
-    chunk_tree->clean();
+    //chunk_tree->clean();
     //noise_texture.clean();
 
     device.destroySampler( texture_sampler, nullptr );

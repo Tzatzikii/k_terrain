@@ -3,7 +3,7 @@
 precision highp float;
 precision highp sampler2D;
 
-layout(quads, fractional_odd_spacing, ccw) in;
+layout(quads, fractional_even_spacing, ccw) in;
 
 layout(binding = 0) uniform MVP {
     mat4 model;
@@ -50,6 +50,7 @@ void main() {
 
     // lookup texel at patch coordinate for height and scale + shift as desired
     height = textureLod(noises[nonuniformEXT(chunkIndex)], texCoord, 0.0).r * 256.0;
+    height = floor(height);
     //height = dist/2.0;
 
     // compute patch surface normal

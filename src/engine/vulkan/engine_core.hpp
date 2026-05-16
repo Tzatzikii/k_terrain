@@ -159,7 +159,7 @@ protected:
 
     Camera                      camera = Camera({0, 0, 0.0});
 
-    std::unique_ptr<ChunkTree>  chunk_tree;
+    std::unique_ptr<QuadTree>  chunk_tree;
     
     std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
 
@@ -249,7 +249,7 @@ protected:
     void generate_mipmaps( vk::Image image, vk::Format image_format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels );
     void update_uniform_buffer( uint32_t currentImage );
     void update_terrain();   
-    void update_vertex_buffer();
+    void recreate_vertex_buffer();
 
     static bool check_validation_layer_support();
     static void framebuffer_resize_callback( GLFWwindow * window, int width, int height ) {

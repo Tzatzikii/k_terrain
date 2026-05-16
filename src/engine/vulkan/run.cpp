@@ -91,8 +91,11 @@ void BaseApp::draw_frame() {
 
     result = present_queue.presentKHR( &present_info );
 
-    if( result == vk::Result::eErrorOutOfDateKHR    || 
-        result == vk::Result::eSuboptimalKHR        || framebuffer_resized ) {
+    if( 
+        result == vk::Result::eErrorOutOfDateKHR    || 
+        result == vk::Result::eSuboptimalKHR        || 
+        framebuffer_resized 
+    ) {
             framebuffer_resized = false;
             recreate_swapchain();
     }
@@ -101,11 +104,13 @@ void BaseApp::draw_frame() {
     }
 
     current_frame = ( current_frame + 1 ) % MAX_FRAMES_IN_FLIGHT;
+    
 }
 
 void BaseApp::main_loop() {
 
     static auto prev = std::chrono::high_resolution_clock::now();
+    static uint64_t frame = 0;
     
     
     while( !glfwWindowShouldClose(window) ) {
@@ -115,10 +120,10 @@ void BaseApp::main_loop() {
 
         glfwPollEvents();
         key_events( dt/1000.0f );
-        //chunk_tree->update( this );
         draw_frame();
 
         prev = now;
+        frame++;
     }
 
     device.waitIdle();

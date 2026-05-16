@@ -82,6 +82,12 @@ void BaseApp::create_vertex_buffer() {
     device.freeMemory( staging_buffer_memory, nullptr );
 }
 
+void BaseApp::recreate_vertex_buffer() {
+    device.destroyBuffer( vertex_buffer );
+    device.freeMemory( vertex_buffer_memory );
+    create_vertex_buffer();
+}
+
 void BaseApp::create_index_buffer() {
     vk::DeviceSize buffer_size = sizeof( indices[0] ) * indices.size();
 

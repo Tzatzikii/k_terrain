@@ -13,7 +13,7 @@ void BaseApp::create_descriptor_set_layout() {
 
     vk::DescriptorSetLayoutBinding noise_sampler_layout_binding{};
     noise_sampler_layout_binding.binding            = 1;
-    noise_sampler_layout_binding.descriptorCount    = chunk_tree->get_tree_size();
+    noise_sampler_layout_binding.descriptorCount    = chunk_tree->get_leaf_count();
     noise_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     noise_sampler_layout_binding.pImmutableSamplers = nullptr;
     noise_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |

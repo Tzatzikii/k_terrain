@@ -47,8 +47,8 @@ void BaseApp::load_model( std::string path ) {
     }
 
 
-    this->chunk_tree = std::make_unique<ec::ChunkTree>( 0, 0, 1024 );
-    //chunk_tree->update( this );
+    this->chunk_tree = std::make_unique<ec::QuadTree>( 0, 0, 1024 );
+    chunk_tree->update( this->camera.get_pos() );
     chunk_tree->get_geometry( vertices, indices, 0 );
     
     std::cout << vertices.size() << std::endl;
@@ -63,7 +63,13 @@ void BaseApp::load_models() {
 }
 
 void BaseApp::update_terrain() {
-
+    chunk_tree->update(get_camera_pos());
+    //chunk_tree->generate_noise_textures(this);
+    vertices.clear();
+    indices.clear();
+    chunk_tree->get_geometry( vertices, indices, 0);
+    recreate_vertex_buffer();
+    
 }
 
 } // namespace ec
