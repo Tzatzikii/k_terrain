@@ -125,6 +125,8 @@ public:
     void update_tree_size();
 
     void update_children( glm::vec3 _eye_pos );
+
+    void render( BaseApp& _current_app );
 };
 
 }

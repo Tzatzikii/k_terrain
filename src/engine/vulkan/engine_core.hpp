@@ -159,7 +159,7 @@ protected:
 
     Camera                      camera = Camera({0, 0, 0.0});
 
-    std::unique_ptr<QuadTree>  chunk_tree;
+    ec::QuadTree                quad_tree;
     
     std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
 

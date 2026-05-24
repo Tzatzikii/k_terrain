@@ -227,7 +227,7 @@ private:
 
         command_buffer.bindDescriptorSets( vk::PipelineBindPoint::eGraphics, pipeline_layout, 0, 1, &descriptor_sets[current_frame], 0, nullptr );
 
-        command_buffer.drawIndexed( static_cast<uint32_t>( indices.size() ), 1, 0, 0, 0 );
+        command_buffer.drawIndexed( static_cast<uint32_t>( indices.size() ), quad_tree.get_leaf_count(), 0, 0, 0 );
         
         command_buffer.endRenderPass();
 
