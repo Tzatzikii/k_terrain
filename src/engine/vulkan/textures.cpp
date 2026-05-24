@@ -16,58 +16,9 @@ void BaseApp::create_texture_image() {
         throw std::runtime_error( "failed to load texture image!" );
     }
 
-    FastNoise noise{};
-    noise.SetNoiseType( FastNoise::NoiseType::Perlin );
-    float scale = 2.0f/256.0f;
-    int index = 0;
-    for( int x = 0; x < tex_width; x++ ) {
-        for( int y = 0; y < tex_height; y++ ) {
-            float n = noise.GetNoise(static_cast<float>(x), static_cast<float>(y));
-            unsigned char pixel = static_cast<unsigned char>(std::clamp( (n+1.0f)/scale, 0.0f, 255.0f ));
-            noise_pixels[index++] = pixel;
-            noise_pixels[index++] = pixel;
-            noise_pixels[index++] = pixel;
-            noise_pixels[index++] = 255;
-        }
-    }
-    
-
-    // vk::Buffer staging_buffer;
-    // vk::DeviceMemory staging_buffer_memory;
-    // vk::Buffer noise_staging_buffer;
-    // vk::DeviceMemory noise_staging_buffer_memory;
-
-    // create_buffer( 
-    //     image_size, 
-    //     vk::BufferUsageFlagBits     ::eTransferSrc, //VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-    //     vk::MemoryPropertyFlagBits  ::eHostCoherent, //VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
-    //     staging_buffer, 
-    //     staging_buffer_memory 
-    // );
-    
-    
-
-    // void * data_2;
-    // device.mapMemory( noise_staging_buffer_memory, 0, noise_image_size, {}, &data_2 );
-    // std::memcpy( data_2, pixels, static_cast<size_t>( noise_image_size ) );
-    //vkUnmapMemory( device, staging_buffer_memory );
-
-    //vk::CommandBuffer temp_cmd_buffer = begin_single_time_commands();
-    //chunk_tree->update( this );
     chunk_tree->generate_noise_textures( this );
-    //noise_texture = Texture( physical_device, device, temp_cmd_buffer, staging_buffer, noise_pixels, tex_width, tex_height );
     free(noise_pixels);
-    //end_single_time_commands( temp_cmd_buffer );
-
-    //temp_cmd_buffer = begin_single_time_commands();
     texture = Texture( this, pixels, tex_width, tex_height );
-    free(pixels);
-    //end_single_time_commands( temp_cmd_buffer );
-
-    //chunk_tree->set_textures( texture );
-
-    // device.destroyBuffer( staging_buffer, nullptr );
-    // device.freeMemory( staging_buffer_memory, nullptr );
 
 }
 

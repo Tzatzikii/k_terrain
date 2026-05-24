@@ -11,11 +11,12 @@ struct ImageProperties {
     uint32_t                width;
     uint32_t                height;
     uint32_t                mip_levels;
+    uint32_t                layer_count;
     vk::SampleCountFlagBits sample_count;
     vk::Format              format;
     vk::ImageTiling         tiling;
     vk::ImageUsageFlags     usage;
-    vk::MemoryPropertyFlags property_flags;
+    vk::MemoryPropertyFlags memory_flags;
 };
 
 
@@ -33,7 +34,7 @@ public:
     vk::ImageView& get_view() { return view; }
     void transition_layout( vk::CommandBuffer& _cmd_buffer, vk::ImageLayout _old, vk::ImageLayout _new );
     void create_view( vk::ImageAspectFlags _aspect_flags );
-    void copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer, uint32_t width, uint32_t height );
+    void copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer );
 
     void clean();
 };   

@@ -30,9 +30,14 @@ Texture::Texture(
     BaseApp*            _current_app,
     unsigned char*      _pixels, 
     int                 _width, 
-    int                 _height 
+    int                 _height,
+    int                 _count = 1
 )
-    : current_app(_current_app), physical_device( _current_app->get_physical_device() ), device( _current_app->get_device() ), width(_width), height(_height)
+    :   current_app(_current_app), 
+        physical_device( _current_app->get_physical_device() ), 
+        device( _current_app->get_device() ), 
+        width(_width), 
+        count(_count)
 {
     create_vk( _pixels);
 }
@@ -66,21 +71,21 @@ void Texture::create_vk( stbi_uc* _pixels ) {
     device.mapMemory( staging_buffer_memory, 0, image_size, {}, &data );
     std::memcpy( data, _pixels, static_cast<size_t>( image_size ) );
 
+    ec::ImageProperties properties{};
+    properties.width        = width;
+    properties.height       = height;
+    properties.mip_levels   = mip_levels;
+    properties.layer_count  = count;
+    properties.sample_count = vk::SampleCountFlagBits::e1;
+    properties.format       = vk::Format::eR8G8B8A8Srgb;
+    properties.tiling       = vk::ImageTiling::eOptimal;
+    properties.usage        = vk::ImageUsageFlagBits  ::eTransferDst  |
+                              vk::ImageUsageFlagBits  ::eSampled      |
+                              vk::ImageUsageFlagBits  ::eTransferSrc,
 
-    ImageProperties properties{
-        width, 
-        height, 
-        this->mip_levels, 
-        vk::SampleCountFlagBits ::e1, //VK_SAMPLE_COUNT_1_BIT, 
-        vk::Format              ::eR8G8B8A8Srgb, //VK_FORMAT_R8G8B8A8_SRGB, 
-        vk::ImageTiling         ::eOptimal, //VK_IMAGE_TILING_OPTIMAL,
+    properties.memory_flags = vk::MemoryPropertyFlagBits::eDeviceLocal;
 
-        vk::ImageUsageFlagBits  ::eTransferDst  | // VK_IMAGE_USAGE_TRANSFER_DST_BIT | 
-        vk::ImageUsageFlagBits  ::eSampled      | // VK_IMAGE_USAGE_SAMPLED_BIT      | 
-        vk::ImageUsageFlagBits  ::eTransferSrc,   // VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-
-        vk::MemoryPropertyFlagBits::eDeviceLocal //VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-    };
+    
 
     image.create( 
         physical_device,
@@ -96,9 +101,7 @@ void Texture::create_vk( stbi_uc* _pixels ) {
 
     image.copy_from_buffer(
         cmd_buffer,
-        staging_buffer,
-        static_cast<uint32_t>( width ),
-        static_cast<uint32_t>( height ) 
+        staging_buffer
     );
 
     image.transition_layout(

@@ -3,16 +3,16 @@
 namespace ec {
 
 void BaseApp::create_descriptor_set_layout() {
-    vk::DescriptorSetLayoutBinding ubo_layout_binding{};
-    ubo_layout_binding.binding              = 0;
-    ubo_layout_binding.descriptorType       = vk::DescriptorType::eUniformBuffer; //VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    ubo_layout_binding.descriptorCount      = 1;
-    ubo_layout_binding.stageFlags           = vk::ShaderStageFlagBits::eVertex |
+    vk::DescriptorSetLayoutBinding mvp_layout_binding{};
+    mvp_layout_binding.binding              = 0;
+    mvp_layout_binding.descriptorType       = vk::DescriptorType::eUniformBuffer; //VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    mvp_layout_binding.descriptorCount      = 1;
+    mvp_layout_binding.stageFlags           = vk::ShaderStageFlagBits::eVertex |
                                               vk::ShaderStageFlagBits::eTessellationEvaluation;//VK_SHADER_STAGE_VERTEX_BIT;
-    ubo_layout_binding.pImmutableSamplers   = nullptr;
+    mvp_layout_binding.pImmutableSamplers   = nullptr;
 
     vk::DescriptorSetLayoutBinding noise_sampler_layout_binding{};
-    noise_sampler_layout_binding.binding            = 1;
+    noise_sampler_layout_binding.binding            = 2;
     noise_sampler_layout_binding.descriptorCount    = chunk_tree->get_leaf_count();
     noise_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     noise_sampler_layout_binding.pImmutableSamplers = nullptr;
@@ -20,7 +20,7 @@ void BaseApp::create_descriptor_set_layout() {
                                                 vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
                                                 
     vk::DescriptorSetLayoutBinding texture_sampler_layout_binding{};
-    texture_sampler_layout_binding.binding            = 2;
+    texture_sampler_layout_binding.binding            = 3;
     texture_sampler_layout_binding.descriptorCount    = 1;
     texture_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     texture_sampler_layout_binding.pImmutableSamplers = nullptr;
@@ -28,7 +28,7 @@ void BaseApp::create_descriptor_set_layout() {
                                                  vk::ShaderStageFlagBits::eTessellationEvaluation;
 
     std::array<vk::DescriptorSetLayoutBinding, 3> bindings = {
-        ubo_layout_binding, noise_sampler_layout_binding, texture_sampler_layout_binding
+        mvp_layout_binding, noise_sampler_layout_binding, texture_sampler_layout_binding
     };
 
     vk::DescriptorSetLayoutCreateInfo layout_info{};

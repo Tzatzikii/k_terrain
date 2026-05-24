@@ -31,7 +31,7 @@ void Image2D::create( vk::PhysicalDevice& _physical_device, vk::Device& _device,
     vk::MemoryAllocateInfo alloc_info{};
     alloc_info.sType             = vk::StructureType::eMemoryAllocateInfo; //VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize    = mem_requirements.size;
-    alloc_info.memoryTypeIndex   = ec::find_memory_type( _physical_device, mem_requirements.memoryTypeBits, _properties.property_flags );
+    alloc_info.memoryTypeIndex   = ec::find_memory_type( _physical_device, mem_requirements.memoryTypeBits, _properties.memory_flags );
 
     if( _device.allocateMemory( &alloc_info, nullptr, &vk_memory ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to create image memory!" );
@@ -112,30 +112,33 @@ void Image2D::create_view( vk::ImageAspectFlags _aspect_flags ) {
     }
 }
 
-void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer, uint32_t width, uint32_t height ) {    
-    vk::BufferImageCopy region{};
-    region.bufferOffset         = 0;
-    region.bufferRowLength      = width;
-    region.bufferImageHeight    = height;
+void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer ) {   
+    std::vector<vk::BufferImageCopy> regions{};
+    for( int layer = 0; layer < properties.layer_count; layer++ ) {
+        vk::BufferImageCopy region{};
+        region.bufferOffset         = 0;
+        region.bufferRowLength      = properties.width;
+        region.bufferImageHeight    = properties.height;
+        
+        region.imageSubresource.aspectMask      = vk::ImageAspectFlagBits::eColor; //VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.mipLevel        = 0;
+        region.imageSubresource.baseArrayLayer  = layer;
+        region.imageSubresource.layerCount      = 1;
     
-    region.imageSubresource.aspectMask      = vk::ImageAspectFlagBits::eColor; //VK_IMAGE_ASPECT_COLOR_BIT;
-    region.imageSubresource.mipLevel        = 0;
-    region.imageSubresource.baseArrayLayer  = 0;
-    region.imageSubresource.layerCount      = 1;
-
-    region.imageOffset = vk::Offset3D{0, 0, 0};
-    region.imageExtent = vk::Extent3D{
-        width,
-        height,
-        1
-    };
+        region.imageOffset = vk::Offset3D{0, 0, 0};
+        region.imageExtent = vk::Extent3D{
+            properties.width,
+            properties.height,
+            1
+        };
+    } 
 
     _cmd_buffer.copyBufferToImage(
         _buffer,
         this->vk_image,
         vk::ImageLayout::eTransferDstOptimal, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
         1,
-        &region
+        regions.data()
     );
 }
 

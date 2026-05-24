@@ -16,9 +16,9 @@ vk::VertexInputBindingDescription vertex::get_binding_description() {
 
 }
 
-std::array<vk::VertexInputAttributeDescription, 3> vertex::get_attribute_descriptions() {
+std::array<vk::VertexInputAttributeDescription, 4> vertex::get_attribute_descriptions() {
     
-    std::array<vk::VertexInputAttributeDescription, 3> attribute_descriptions{};
+    std::array<vk::VertexInputAttributeDescription, 4> attribute_descriptions{};
 
     attribute_descriptions[0].binding = 0;
         attribute_descriptions[0].location = 0;
@@ -35,11 +35,16 @@ std::array<vk::VertexInputAttributeDescription, 3> vertex::get_attribute_descrip
         attribute_descriptions[2].format = vk::Format::eR32Uint;
         attribute_descriptions[2].offset = offsetof( vertex, chunk_index );
 
+        attribute_descriptions[3].binding = 0;
+        attribute_descriptions[3].location = 3;
+        attribute_descriptions[3].format = vk::Format::eR32G32B32A32Sfloat;
+        attribute_descriptions[3].offset = offsetof( vertex, tess_edges );
+
         return attribute_descriptions;
 }
 
 bool vertex::operator==( const vertex& other ) const {
-    return pos == other.pos && tex_coord == other.tex_coord;
+    return pos == other.pos && tex_coord == other.tex_coord && tess_edges == other.tess_edges;
 }
 
 } // namespace ec

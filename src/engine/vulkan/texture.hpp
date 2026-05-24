@@ -24,6 +24,7 @@ private:
     int                 height;
     int                 channels;
     int                 mip_levels = 1;
+    int                 count;
 
     void create_vk( stbi_uc* _pixels );
     stbi_uc* load_image( std::string _path );
@@ -39,7 +40,8 @@ public:
         BaseApp*            _current_app,
         unsigned char*      _pixels, 
         int                 _width, 
-        int                 _height 
+        int                 _height,
+        int                 _count
     );
     vk::ImageView get_view() { return image.get_view(); }
     void create_view( vk::ImageAspectFlags _aspect_flags ) { image.create_view(_aspect_flags); }
@@ -52,6 +54,7 @@ public:
         physical_device     = other.physical_device;
         device              = other.device;
         image               = other.image;
+        count              = other.count;
         return *this;
     }
 
