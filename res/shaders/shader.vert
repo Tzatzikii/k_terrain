@@ -20,7 +20,7 @@ layout(location = 4) out float outInstanceSize;
 layout(location = 5) out uvec4 outInstanceTessEdges;
 
 void main() {
-    gl_Position = vec4(inPosition, 1.0);
+    gl_Position = vec4(inPosition*inInstanceSize, 1.0);
     outTexCoord = inTexCoord;
     outInstanceIndex = inInstanceIndex;
     outInstanceCenter = inInstanceCenter;

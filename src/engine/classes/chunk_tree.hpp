@@ -20,7 +20,7 @@ private:
 
     struct Node {
 
-        std::unique_ptr<QuadTree::Node> children[4] = { nullptr };
+        std::shared_ptr<QuadTree::Node> children[4] = { nullptr };
 
         int64_t level = 0;
 
@@ -60,8 +60,8 @@ private:
 
             ); 
         }
-
-        void make_leaf( uint32_t _new_index );
+        
+        void collapse( uint32_t _new_index );
 
         bool is_leaf() {
             return children[0] == nullptr;
@@ -72,9 +72,11 @@ private:
         //std::unique_ptr<QuadTree> create_child( int local_i, int local_j );
 
     };
+    
+    void subdivide_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node );
 
-    std::unique_ptr<QuadTree::Node> top_node;
-    std::vector<std::unique_ptr<QuadTree::Node>> leaves;
+    std::shared_ptr<QuadTree::Node> top_node;
+    std::vector<std::shared_ptr<QuadTree::Node>> leaves;
 
 
     uint64_t id_tracker;
@@ -85,6 +87,8 @@ private:
     
 public:
 
+    void generate();
+
     struct LeafInfo {
 
         uint32_t index;
@@ -92,7 +96,7 @@ public:
         float size;
         uint32_t tess_edges[4]; // Booleans, but I want to avoid undefined behavior since glsl doesn't support booleans
 
-        LeafInfo operator=( LeafInfo& other ) {
+        LeafInfo operator=( const LeafInfo& other ) {
             index = other.index;
             pos = other.pos;
             size = other.size;
@@ -132,9 +136,7 @@ public:
     
     void get_geometry( std::vector<vertex>& _vertices, std::vector<uint32_t>& _indices, uint32_t _n );
 
-    std::vector<LeafInfo> get_leaf_info() {
-
-    }
+    std::vector<LeafInfo> get_leaf_infos();
 
     uint64_t get_leaf_count() { return leaf_count; }
 
@@ -155,6 +157,8 @@ public:
     void update_children( glm::vec3 _eye_pos );
 
     void render( BaseApp& _current_app );
+
+    void create_leaf();
 };
 
 }

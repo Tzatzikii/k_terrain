@@ -17,11 +17,7 @@ vk::ShaderModule BaseApp::create_shader_module( const std::vector<char>& code ) 
     return shader_module;
 }
 
-void BaseApp::create_graphics_pipeline(
-    
-
-
-) {
+void BaseApp::create_graphics_pipeline() {
 
     auto vert_shader_code = read_file( "bin/shaders/vert.spv" );
     auto tesc_shader_code = read_file( "bin/shaders/tesc.spv" );

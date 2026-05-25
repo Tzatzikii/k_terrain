@@ -54,6 +54,9 @@ void BaseApp::load_model( std::string path ) {
     indices.push_back(1);
     indices.push_back(2);
     indices.push_back(3);
+    quad_tree.generate();
+    instances = quad_tree.get_leaf_infos();
+   // instances.insert( instances.begin(), infos.begin(), instances.end());
     // this->chunk_tree = std::make_unique<ec::QuadTree>( 0, 0, 1024 );
     // chunk_tree->update( this->camera.get_pos() );
     // chunk_tree->get_geometry( vertices, indices, 0 );

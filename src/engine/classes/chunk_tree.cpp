@@ -5,14 +5,40 @@
 
 namespace ec {
 
+void QuadTree::generate() {
+    top_node = std::make_shared<QuadTree::Node>(0, 0, 1024);
+    subdivide_node( glm::vec3{0, 0, 0}, top_node );
+}
 
+void QuadTree::subdivide_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node ) {
+    float dx = _eye_pos.x - _node->cx;
+    float dy = _eye_pos.y - _node->cy;
+    float dist = std::sqrt(dx*dx + dy*dy);
+    if( _node->is_divisible( dist )) {
+        _node->subdivide( _eye_pos );
+        for( auto child : _node->children ) {
+            subdivide_node( _eye_pos, child );
+        }
+    }
+    else {
+        _node->collapse( id_tracker++ );
+        leaves.push_back(_node);
+    }
 
+}
 
-// QuadTree::QuadTree( int64_t _cx, int64_t _cy, uint64_t _size, int64_t _level, uint32_t _id ) 
-//     : cx(_cx), cy(_cy), size(_size), level(_level), index(_id)
-// {
-    
-// }  
+std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
+    std::vector<ec::QuadTree::LeafInfo> leaf_infos;
+    for( auto leaf : leaves ) {
+        LeafInfo info;
+        info.pos = glm::vec2( leaf->cx, leaf->cy );
+        info.size = leaf->size;
+        info.index = leaf->index;
+        info.tess_edges[0] = info.tess_edges[1] = info.tess_edges[2] = info.tess_edges[3] = 0;
+        leaf_infos.push_back(info);
+    }
+    return leaf_infos;
+}
 
 void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
 
@@ -25,8 +51,8 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
             int64_t next_cx = cx+i*static_cast<int64_t>(size/4);
             int64_t next_cy = cy+j*static_cast<int64_t>(size/4);
             int64_t next_size = size/2;
-            std::unique_ptr<QuadTree::Node> next = std::make_unique<QuadTree::Node>( next_cx, next_cy, next_size, level+1 );
-            std::swap( children[index++], next );
+            std::shared_ptr<QuadTree::Node> next = std::make_shared<QuadTree::Node>( next_cx, next_cy, next_size, level+1 );
+            children[index++] = next;
         }
         
     } 
@@ -124,7 +150,8 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
 
 // }
 
-void QuadTree::Node::make_leaf( uint32_t _new_index ) {
+
+void QuadTree::Node::collapse( uint32_t _new_index ) {
 
     //this->delete_children();
     this->dirty = true;
