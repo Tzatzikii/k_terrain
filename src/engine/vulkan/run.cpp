@@ -181,6 +181,7 @@ private:
         }
         if( keys_pressed[ GLFW_KEY_U ] ) {
             quad_tree.update(get_camera_pos());
+            instances = quad_tree.get_leaf_infos();
         }
     }
 
@@ -223,8 +224,10 @@ private:
 
         command_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, graphics_pipeline );
 
-        //quad_tree.update(get_camera_pos());
-        instances = quad_tree.get_leaf_infos();
+        if(current_frame % 4 == 0) {
+          //  quad_tree.update(get_camera_pos());
+        }
+        //instances = quad_tree.get_leaf_infos();
         create_instance_buffer();
 
         vk::Buffer vertex_buffers[] = { vertex_buffer, instance_buffer };

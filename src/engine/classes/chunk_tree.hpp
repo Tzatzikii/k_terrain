@@ -4,6 +4,8 @@
 #include <memory>
 #include <stdint.h>
 #include <vector>
+#include <queue>
+#include <iostream>
 #include "../math/vertex.hpp"
 #include "../etc/header_libs.hpp"
 #include "../vulkan/texture.hpp"
@@ -18,6 +20,30 @@ class QuadTree {
 
 private:
 
+    class IndexPool {
+
+    private:
+        std::queue<uint32_t> index_pool;
+        int32_t next = 0;
+
+    public:
+
+        int32_t get() {
+            std::cout << next << std::endl;
+            if( !index_pool.empty() ) {
+                int32_t index = index_pool.front();
+                index_pool.pop();
+                return index;
+            }
+            else return next++;
+        }
+        void put( int32_t _index ) {
+            if(_index < 0) return;
+            index_pool.push(_index);
+        }
+
+    };
+
     struct Node {
 
         std::shared_ptr<QuadTree::Node> children[4] = { nullptr };
@@ -28,7 +54,7 @@ private:
 
         uint64_t size;
 
-        uint32_t index;
+        int32_t index;
 
         bool dirty = false;
         bool is_leaf = false;
@@ -37,7 +63,7 @@ private:
         const int64_t   min_size         = 16;
         const uint64_t  seed             = 727;
 
-        Node( int64_t _cx, int64_t _cy, uint64_t _size = INT64_MAX*2, int64_t _level = 0, uint32_t _index = -1 )
+        Node( int64_t _cx, int64_t _cy, uint64_t _size = INT64_MAX*2, int64_t _level = 0, int32_t _index = -1 )
             : cx(_cx), cy(_cy), size(_size), level(_level), index(_index){}
 
         void subdivide( glm::vec3 _eye_pos );
@@ -62,28 +88,33 @@ private:
             ); 
         }
         
-        void collapse( uint32_t _new_index );
+        void collapse( IndexPool& _index_pool );
 
-        void collapse_branch();
+        void collapse_branch( IndexPool& _index_pool );
         
         bool has_children() { return children[0] != nullptr; }
         //std::unique_ptr<QuadTree> create_child( int local_i, int local_j );
 
     };
+
+    uint32_t next_index = 0;
     
     void update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node );
 
     std::shared_ptr<QuadTree::Node> top_node;
     std::vector<std::shared_ptr<QuadTree::Node>> leaves;
 
-
-    uint64_t id_tracker;
+    IndexPool index_pool;
 
     uint64_t leaf_count = 1;
 
     Texture noise_texture;
 
     void flush_dirty();
+
+    int is_edge( std::shared_ptr<Node> _node, int _side_index );
+
+    friend bool compare_node_dist();
     
 public:
 
@@ -141,7 +172,6 @@ public:
     uint64_t get_leaf_count() { return leaf_count; }
 
     void get_noise_views( std::vector<vk::ImageView>& _views );
-    void set_textures( Texture& texture );
 
     Texture generate_noise_texture(
         BaseApp* _current_app

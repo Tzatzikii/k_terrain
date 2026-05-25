@@ -26,10 +26,10 @@ void main() {
         outInstanceCenter   = inInstanceCenter[0];
         outInstanceSize     = inInstanceSize[0];
         // Outer edges
-        gl_TessLevelOuter[0] = tessLevel / ( inTessEdges[0].x > 0 ? 2.0 : 1.0 );
-        gl_TessLevelOuter[1] = tessLevel / ( inTessEdges[0].y > 0 ? 2.0 : 1.0 );
-        gl_TessLevelOuter[2] = tessLevel / ( inTessEdges[0].z > 0 ? 2.0 : 1.0 );
-        gl_TessLevelOuter[3] = tessLevel / ( inTessEdges[0].w > 0 ? 2.0 : 1.0 );
+        gl_TessLevelOuter[1] = tessLevel * inTessEdges[0].x;
+        gl_TessLevelOuter[2] = tessLevel * inTessEdges[0].y;
+        gl_TessLevelOuter[3] = tessLevel * inTessEdges[0].z;
+        gl_TessLevelOuter[0] = tessLevel * inTessEdges[0].w;
 
         // Inner (for triangles, only [0] is used)
         gl_TessLevelInner[0] = tessLevel;

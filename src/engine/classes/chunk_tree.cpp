@@ -6,8 +6,9 @@
 namespace ec {
 
 void QuadTree::generate( glm::vec3 _eye_pos ) {
-    top_node = std::make_shared<QuadTree::Node>(0, 0, 1024);
+    top_node = std::make_shared<QuadTree::Node>(0, 0, 65536);
     update_node( _eye_pos, top_node );
+    
 }
 
 void QuadTree::update( glm::vec3 _eye_pos ) {
@@ -29,8 +30,10 @@ void QuadTree::update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> 
             update_node( _eye_pos, child );
         }
     }
-    else{
-        _node->collapse( id_tracker++ );
+    else if( !_node->is_leaf ){
+        _node->collapse(index_pool);
+        _node->index = index_pool.get();
+        
         if(std::find(leaves.begin(), leaves.end(), _node) == leaves.end()) {
             leaves.push_back(_node);
         }
@@ -40,7 +43,13 @@ void QuadTree::update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> 
 }
 
 void QuadTree::flush_dirty() {
-    
+    for( int i = leaves.size() - 1; i >= 0; i--) {
+        if(leaves[i]->dirty) {
+            index_pool.put(leaves[i]->index);
+            leaves[i] = nullptr;
+            leaves.erase(leaves.begin() + i);
+        }
+    }
 }
 
 std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
@@ -51,7 +60,11 @@ std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
         info.pos = glm::vec2( leaf->cx, leaf->cy );
         info.size = leaf->size;
         info.index = leaf->index;
-        info.tess_edges[0] = info.tess_edges[1] = info.tess_edges[2] = info.tess_edges[3] = 0;
+
+        for( int i = 0; i < 4; i++ ) {
+            info.tess_edges[i] = is_edge(leaf, i);    
+        }
+
         leaf_infos.push_back(info);
     }
     static auto log = leaf_infos.size();
@@ -59,12 +72,64 @@ std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
         std::cout << leaf_infos.size() << " / " << leaves.size() << std::endl;
         log = leaf_infos.size();
     }
+    if( leaves.size() > leaf_infos.size() * 4 ) {
+        flush_dirty();
+    }
     return leaf_infos;
+}
+
+
+int QuadTree::is_edge( std::shared_ptr<Node> _node, int _side_index ) {
+    auto closest = leaves[0];
+    glm::vec2 closest_pos = { closest->cx, closest->cy };
+    glm::vec2 node_mod = {0, 0};
+    glm::vec2 cmp_mod = {0, 0};
+    switch(_side_index) {
+        case 0: {
+            node_mod.x=-1;
+            cmp_mod.x=1;
+            break;
+        }
+        case 1: {
+            node_mod.y+=1;
+            cmp_mod.y=-1;
+            break;
+        }
+        case 2: {
+            node_mod.x=1;
+            cmp_mod.x=-1;
+            break;
+        }
+        case 3: {
+            node_mod.y=-1;
+            cmp_mod.y=1;
+            break;
+        }
+    }
+    // lets pray to heavens this somehow doesnt get larger than INT64_MAX, however i can hardly imagine that
+    glm::vec2 node_sc = glm::vec2(_node->cx, _node->cy) + node_mod * static_cast<float>(_node->size/2);
+    glm::vec2 cmp_sc = closest_pos + cmp_mod * static_cast<float>(closest->size/2);
+    glm::vec2 diff = node_sc - cmp_sc;
+    float closest_dist = glm::length(diff);
+    
+    // side indices are based on the vulkan tessellation indexing
+    // https://docs.vulkan.org/spec/latest/chapters/tessellation.html
+    for( auto node : leaves ) {
+        if(node == _node || !_node->is_leaf || _node->dirty) continue;
+        glm::vec2 pos = {node->cx, node->cy};
+        cmp_sc = pos + cmp_mod * static_cast<float>(node->size/2);
+        diff = node_sc - cmp_sc;
+        float dist = glm::length(diff);
+        if( dist < closest_dist ) {
+            closest = node;
+            closest_dist = dist;
+        }
+    }
+    return std::max(1.0f, (float)_node->size / (float)closest->size);
 }
 
 void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
     is_leaf = false;
-    int index = 0;
 
     if( this->has_children() ) {
         this->children[0]->dirty = false;
@@ -73,7 +138,7 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
         this->children[3]->dirty = false;
         return;
     }
-
+    int iter = 0;
     for( int i = -1; i <= 1; i+=2 ) {
 
         for( int j = -1; j <= 1; j+=2 ) {
@@ -82,29 +147,32 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
             int64_t next_cy = cy+j*static_cast<int64_t>(size/4);
             int64_t next_size = size/2;
             std::shared_ptr<QuadTree::Node> next = std::make_shared<QuadTree::Node>( next_cx, next_cy, next_size, level+1 );
-            children[index++] = next;
+            children[iter++] = next;
         }
         
     } 
     
 }
 
-void QuadTree::Node::collapse( uint32_t _new_index ) {
-    if(!this->dirty) { index = _new_index; }
-    collapse_branch();
+void QuadTree::Node::collapse( IndexPool& _index_pool ) {
+    collapse_branch( _index_pool );
     this->dirty = false; // un-dirt the top of the branch
     this->is_leaf = true;
    
 }
 
-void QuadTree::Node::collapse_branch() {
+void QuadTree::Node::collapse_branch( IndexPool& _index_pool ) {
     if( this->has_children() ) {
-        this->children[0]->collapse_branch();
-        this->children[1]->collapse_branch();
-        this->children[2]->collapse_branch();
-        this->children[3]->collapse_branch();
+        this->children[0]->collapse_branch( _index_pool );
+        this->children[1]->collapse_branch( _index_pool );
+        this->children[2]->collapse_branch( _index_pool );
+        this->children[3]->collapse_branch( _index_pool );
     }
-    dirty = true;
+    if(!dirty) {
+        dirty = true;
+        //_index_pool.put(index);
+    }
+
 }
 
 void QuadTree::Node::calculate_noise( u_char* _dest ) {

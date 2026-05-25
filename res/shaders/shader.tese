@@ -63,7 +63,7 @@ void main() {
     vec4 vVec = p10 - p00;
     vec4 normal = normalize( vec4(cross(uVec.xyz, vVec.xyz), 0) );
 
-    p.z += height;
+    p.z += height + log(float(inInstanceIndex));
     p.xy += inInstanceCenter;
     
     gl_Position = mvp.proj * mvp.view * p;
