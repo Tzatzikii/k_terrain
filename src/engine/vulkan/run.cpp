@@ -143,6 +143,14 @@ public:
 
     TestApp() {
         model_paths.push_back( MODEL_PATH );
+        instances.push_back(
+            {
+                0,
+                glm::vec2(0, 0),
+                16.0f,
+                {1, 1, 1, 0}
+            }
+        );
     }
 
 private:
@@ -204,9 +212,11 @@ private:
 
         command_buffer.bindPipeline( vk::PipelineBindPoint::eGraphics, graphics_pipeline );
 
-        vk::Buffer vertex_buffers[] = { vertex_buffer };
-        vk::DeviceSize offsets[] = { 0 };
-        command_buffer.bindVertexBuffers( 0, 1, vertex_buffers, offsets );
+        create_instance_buffer();
+
+        vk::Buffer vertex_buffers[] = { vertex_buffer, instance_buffer };
+        vk::DeviceSize offsets[] = { 0, 0 };
+        command_buffer.bindVertexBuffers( 0, 2, vertex_buffers, offsets );
 
         command_buffer.bindIndexBuffer( index_buffer, 0, vk::IndexType::eUint32 );
 

@@ -134,7 +134,7 @@ void BaseApp::end_single_time_commands( vk::CommandBuffer command_buffer ) {
     device.freeCommandBuffers( command_pool, 1, &command_buffer );
 }
 
-void BaseApp::copyBuffer( vk::Buffer src_buffer, vk::Buffer dst_buffer, vk::DeviceSize size ) {
+void BaseApp::copy_buffer( vk::Buffer src_buffer, vk::Buffer dst_buffer, vk::DeviceSize size ) {
     vk::CommandBuffer command_buffer = begin_single_time_commands();
     
     vk::BufferCopy copy_region{};

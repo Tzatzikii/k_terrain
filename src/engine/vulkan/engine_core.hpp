@@ -116,6 +116,8 @@ protected:
     vk::DeviceMemory            vertex_buffer_memory;
     vk::Buffer                  index_buffer;
     vk::DeviceMemory            index_buffer_memory;
+    vk::Buffer                  instance_buffer;
+    vk::DeviceMemory            instance_buffer_memory;
 
     std::vector<vk::Buffer>     uniform_buffers;
     std::vector<vk::DeviceMemory>   uniform_buffers_memory;
@@ -154,6 +156,7 @@ protected:
 
     std::vector<ec::vertex>     vertices;
     std::vector<uint32_t>       indices;
+    std::vector<ec::QuadTree::LeafInfo> instances;
 
     uint32_t                    current_frame = 0;
 
@@ -193,6 +196,7 @@ protected:
     void load_models();
     void create_vertex_buffer();
     void create_index_buffer();
+    void create_instance_buffer();
     void create_uniform_buffers();
     void create_descriptor_pool();
     void create_descriptor_sets();
@@ -245,7 +249,7 @@ protected:
 
    
     void copy_buffer_to_image( vk::Buffer buffer, vk::Image image, uint32_t width, uint32_t height );
-    void copyBuffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
+    void copy_buffer( vk::Buffer srcBuffer, vk::Buffer dstBuffer, vk::DeviceSize size );
     void generate_mipmaps( vk::Image image, vk::Format image_format, int32_t texWidth, int32_t texHeight, uint32_t mipLevels );
     void update_uniform_buffer( uint32_t currentImage );
     void update_terrain();   

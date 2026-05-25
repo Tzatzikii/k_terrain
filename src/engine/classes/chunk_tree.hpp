@@ -36,7 +36,8 @@ private:
         const int64_t   min_size         = 16;
         const uint64_t  seed             = 727;
 
-        Node( int64_t _cx, int64_t _cy, uint64_t _size = INT64_MAX*2, int64_t _level = 0, uint32_t _index = -1 );
+        Node( int64_t _cx, int64_t _cy, uint64_t _size = INT64_MAX*2, int64_t _level = 0, uint32_t _index = -1 )
+            : cx(_cx), cy(_cy), size(_size), level(_level), index(_index){}
 
         void subdivide( glm::vec3 _eye_pos );
 
@@ -66,6 +67,8 @@ private:
             return children[0] == nullptr;
         }
 
+        
+
         //std::unique_ptr<QuadTree> create_child( int local_i, int local_j );
 
     };
@@ -76,7 +79,7 @@ private:
 
     uint64_t id_tracker;
 
-    uint64_t leaf_count = 0;
+    uint64_t leaf_count = 1;
 
     Texture noise_texture;
     
@@ -87,7 +90,7 @@ public:
         uint32_t index;
         glm::vec2 pos;
         float size;
-        bool tess_edges[4];
+        uint32_t tess_edges[4]; // Booleans, but I want to avoid undefined behavior since glsl doesn't support booleans
 
         LeafInfo operator=( LeafInfo& other ) {
             index = other.index;
@@ -98,9 +101,34 @@ public:
             tess_edges[2] = other.tess_edges[2];
             tess_edges[3] = other.tess_edges[3];
         }
+
+        static std::array<vk::VertexInputAttributeDescription, 4> get_attribute_descriptions() {
+            std::array<vk::VertexInputAttributeDescription, 4> descs;
+            descs[0].format = vk::Format::eR32Uint;
+            descs[0].offset = offsetof( LeafInfo, index );
+            descs[1].format = vk::Format::eR32G32Sfloat;
+            descs[1].offset = offsetof( LeafInfo, pos );
+            descs[2].format = vk::Format::eR32Sfloat;
+            descs[2].offset = offsetof( LeafInfo, size );
+            descs[3].format = vk::Format::eR32G32B32A32Uint;
+            descs[3].offset = offsetof( LeafInfo, tess_edges );
+            for( int i = 0; i < 4; i++ ) {
+                descs[i].binding = 1;
+                descs[i].location = i+ec::vertex::get_attribute_descriptions().size();
+            }
+            return descs;
+        }
+
+        static vk::VertexInputBindingDescription get_binding_description() {
+            vk::VertexInputBindingDescription desc;
+            desc.binding = 1;
+            desc.stride = sizeof( LeafInfo );
+            desc.inputRate = vk::VertexInputRate::eInstance;
+            return desc;
+        }
     };
 
-    QuadTree( uint64_t _size = INT64_MAX*2 );
+    QuadTree( uint64_t _size = INT64_MAX*2 ){}
     
     void get_geometry( std::vector<vertex>& _vertices, std::vector<uint32_t>& _indices, uint32_t _n );
 

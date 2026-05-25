@@ -85,8 +85,6 @@ void Texture::create_vk( stbi_uc* _pixels ) {
 
     properties.memory_flags = vk::MemoryPropertyFlagBits::eDeviceLocal;
 
-    
-
     image.create( 
         physical_device,
         device,
@@ -109,17 +107,6 @@ void Texture::create_vk( stbi_uc* _pixels ) {
         vk::ImageLayout::eTransferDstOptimal,
         vk::ImageLayout::eShaderReadOnlyOptimal
     );
-
-    // copy_buffer_to_image( 
-    //     staging_buffer, 
-    //     texture_image, 
-    //     static_cast<uint32_t>( tex_width ),
-    //     static_cast<uint32_t>( tex_height ) 
-    // );
-
-    
-    //transitionImageLayout( textureImage, VK_FORMAT_R8G8B8A8_SRGB, 
-    //    VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, this->mipLevels );
     current_app->end_single_time_commands( cmd_buffer );
     device.destroyBuffer(staging_buffer);
     device.freeMemory(staging_buffer_memory);

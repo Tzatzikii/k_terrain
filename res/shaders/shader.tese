@@ -12,11 +12,10 @@ layout(binding = 0) uniform MVP {
 } mvp;
 
 layout(location = 1) in vec2 inTexCoord[];
-layout(location = 2) patch in uint chunkIndex;
 
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out float height;
-layout(binding = 1) uniform sampler2D noises[136];
+//layout(binding = 1) uniform sampler2D noises[136];
 layout(binding = 2) uniform sampler2D texSampler;
 
 
@@ -49,8 +48,9 @@ void main() {
     float dist = sqrt( p.x*p.x + p.y*p.y );
 
     // lookup texel at patch coordinate for height and scale + shift as desired
-    height = textureLod(noises[nonuniformEXT(chunkIndex)], texCoord, 0.0).r * 256.0;
-    height = floor(height);
+    //height = textureLod(noises[nonuniformEXT(chunkIndex)], texCoord, 0.0).r * 256.0;
+    //height = floor(height);
+    height = 0;
     //height = dist/2.0;
 
     // compute patch surface normal

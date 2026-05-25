@@ -65,13 +65,24 @@ void BaseApp::create_graphics_pipeline(
         frag_shader_stage_info
     };
 
-    auto binding_description    = ec::vertex::get_binding_description();
-    auto attribute_descriptions = ec::vertex::get_attribute_descriptions();
+    auto vertex_binding_description    = ec::vertex::get_binding_description();
+    auto vertex_attribute_descriptions = ec::vertex::get_attribute_descriptions();
+    auto instance_binding_description       = ec::QuadTree::LeafInfo::get_binding_description();
+    auto instance_attribute_descriptions    = ec::QuadTree::LeafInfo::get_attribute_descriptions();
+    constexpr size_t binding_count = 2;
+    constexpr size_t attribute_count = vertex_attribute_descriptions.size() + instance_attribute_descriptions.size();
+
+    std::array<vk::VertexInputBindingDescription, binding_count> binding_descriptions = {
+        vertex_binding_description, instance_binding_description
+    };
+    std::array<vk::VertexInputAttributeDescription, attribute_count> attribute_descriptions = {};
+    std::copy( vertex_attribute_descriptions.cbegin(), vertex_attribute_descriptions.cend(), attribute_descriptions.begin() );
+    std::copy( instance_attribute_descriptions.cbegin(), instance_attribute_descriptions.cend(), attribute_descriptions.begin()+vertex_attribute_descriptions.size() );
 
     vk::PipelineVertexInputStateCreateInfo vertex_input_info{};
     vertex_input_info.sType                             = vk::StructureType::ePipelineVertexInputStateCreateInfo; //VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertex_input_info.vertexBindingDescriptionCount     = 1;
-    vertex_input_info.pVertexBindingDescriptions        = &binding_description;
+    vertex_input_info.vertexBindingDescriptionCount     = static_cast<uint32_t>( binding_descriptions.size() );
+    vertex_input_info.pVertexBindingDescriptions        = binding_descriptions.data();
     vertex_input_info.vertexAttributeDescriptionCount   = static_cast<uint32_t>( attribute_descriptions.size() );
     vertex_input_info.pVertexAttributeDescriptions      = attribute_descriptions.data();
 

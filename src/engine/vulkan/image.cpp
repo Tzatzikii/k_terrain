@@ -131,13 +131,14 @@ void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buf
             properties.height,
             1
         };
+        regions.push_back(region);
     } 
 
     _cmd_buffer.copyBufferToImage(
         _buffer,
         this->vk_image,
         vk::ImageLayout::eTransferDstOptimal, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-        1,
+        regions.size(),
         regions.data()
     );
 }

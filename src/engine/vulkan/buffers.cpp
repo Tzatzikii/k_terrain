@@ -76,7 +76,7 @@ void BaseApp::create_vertex_buffer() {
         vertex_buffer, 
         vertex_buffer_memory );
 
-    copyBuffer( staging_buffer, vertex_buffer, buffer_size );
+    copy_buffer( staging_buffer, vertex_buffer, buffer_size );
 
     device.destroyBuffer( staging_buffer, nullptr );
     device.freeMemory( staging_buffer_memory, nullptr );
@@ -115,10 +115,35 @@ void BaseApp::create_index_buffer() {
         index_buffer_memory 
     );
 
-    copyBuffer( staging_buffer, index_buffer, buffer_size );
+    copy_buffer( staging_buffer, index_buffer, buffer_size );
 
     vkDestroyBuffer( device, staging_buffer, nullptr );
     vkFreeMemory( device, staging_buffer_memory, nullptr );
+}
+
+void BaseApp::create_instance_buffer() {
+    static void* data;
+    if( instance_buffer == VK_NULL_HANDLE ) {
+        // This would mean that we are standing in the middle of a
+        // chunk grid the size of INT32_MAX.
+        // Since the chunks get exponentially larger, in 1D the amount of chunks is
+        // log2( INT32_MAX - INT32_MIN ) = log2( 2^64 ) = 64.
+        // 4096 is just 64 squared since it's a 2D grid.
+        const uint32_t very_max_chunk_count = 4096; 
+        vk::DeviceSize size = very_max_chunk_count * sizeof( ec::QuadTree::LeafInfo );
+        create_buffer( 
+            size,
+            vk::BufferUsageFlagBits::eVertexBuffer,
+            vk::MemoryPropertyFlagBits::eHostCoherent |
+            vk::MemoryPropertyFlagBits::eHostVisible,
+            instance_buffer,
+            instance_buffer_memory
+        );
+        data = device.mapMemory( instance_buffer_memory, 0, size );
+    }
+
+    std::memcpy( data, instances.data(), instances.size() * sizeof( ec::QuadTree::LeafInfo ) );
+    
 }
 
 void BaseApp::create_uniform_buffers() {

@@ -46,9 +46,14 @@ void BaseApp::load_model( std::string path ) {
     //     }
     // }
 
-    vertices.push_back( vertex{glm::vec2(0, 0, 0), (0, 0), {}});
-
-
+    vertices.push_back( vertex{glm::vec3(-0.5, -0.5, 0), glm::vec2(0, 0)});
+    vertices.push_back( vertex{glm::vec3(-0.5, 0.5, 0), glm::vec2(0, 1)});
+    vertices.push_back( vertex{glm::vec3(0.5, -0.5, 0), glm::vec2(1, 0)});
+    vertices.push_back( vertex{glm::vec3(0.5, 0.5, 0), glm::vec2(1, 1)});
+    indices.push_back(0);
+    indices.push_back(1);
+    indices.push_back(2);
+    indices.push_back(3);
     // this->chunk_tree = std::make_unique<ec::QuadTree>( 0, 0, 1024 );
     // chunk_tree->update( this->camera.get_pos() );
     // chunk_tree->get_geometry( vertices, indices, 0 );
@@ -65,12 +70,6 @@ void BaseApp::load_models() {
 }
 
 void BaseApp::update_terrain() {
-    chunk_tree.update(get_camera_pos());
-    //chunk_tree->generate_noise_textures(this);
-    vertices.clear();
-    indices.clear();
-    chunk_tree->get_geometry( vertices, indices, 0);
-    recreate_vertex_buffer();
     
 }
 

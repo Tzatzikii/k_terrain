@@ -7,7 +7,7 @@ void BaseApp::create_descriptor_pool() {
     pool_sizes[0].type              = vk::DescriptorType::eUniformBuffer; //VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
     pool_sizes[0].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT );
     pool_sizes[1].type              = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pool_sizes[1].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT * chunk_tree->get_leaf_count() );
+    pool_sizes[1].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT );
     pool_sizes[2].type              = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[2].descriptorCount   = static_cast<uint32_t>( MAX_FRAMES_IN_FLIGHT );
 
@@ -47,21 +47,21 @@ void BaseApp::create_descriptor_sets() {
         texture_info.sampler      = texture_sampler;
 
         std::vector<vk::ImageView> noise_views = {};
-        chunk_tree->get_noise_views( noise_views );
-        std::vector<vk::DescriptorImageInfo> noise_images( chunk_tree->get_leaf_count() );
-        for( int i = 0; i < noise_images.size(); i++ ) {
-            auto& image_info = noise_images[i];
-            image_info.imageLayout  = vk::ImageLayout::eShaderReadOnlyOptimal; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-            image_info.imageView    = noise_views[i]; //texture_image_view;
-            image_info.sampler      = noise_sampler;
-        }
+        //chunk_tree->get_noise_views( noise_views );
+        //std::vector<vk::DescriptorImageInfo> noise_images( chunk_tree->get_leaf_count() );
+        // for( int i = 0; i < noise_images.size(); i++ ) {
+        //     auto& image_info = noise_images[i];
+        //     image_info.imageLayout  = vk::ImageLayout::eShaderReadOnlyOptimal; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        //     image_info.imageView    = noise_views[i]; //texture_image_view;
+        //     image_info.sampler      = noise_sampler;
+        // }
 
         // vk::DescriptorImageInfo noise_info{};
         // noise_info.imageLayout  = vk::ImageLayout::eShaderReadOnlyOptimal; //VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         // noise_info.imageView    = noise_texture.get_view(); //texture_image_view;
         // noise_info.sampler      = noise_sampler;
 
-        std::array<vk::WriteDescriptorSet, 3> descriptor_writes{};
+        std::array<vk::WriteDescriptorSet, 2> descriptor_writes{};
         descriptor_writes[0].sType              = vk::StructureType::eWriteDescriptorSet; //VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptor_writes[0].dstSet             = descriptor_sets[i];
         descriptor_writes[0].dstBinding         = 0;
@@ -70,21 +70,21 @@ void BaseApp::create_descriptor_sets() {
         descriptor_writes[0].descriptorCount    = 1;
         descriptor_writes[0].pBufferInfo        = &buffer_info;
 
+        // descriptor_writes[1].sType              = vk::StructureType::eWriteDescriptorSet; //K_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        // descriptor_writes[1].dstSet             = descriptor_sets[i];
+        // descriptor_writes[1].dstBinding         = 1;
+        // descriptor_writes[1].dstArrayElement    = 0;
+        // descriptor_writes[1].descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        // descriptor_writes[1].descriptorCount    = noise_images.size();
+        // descriptor_writes[1].pImageInfo         = noise_images.data();
+
         descriptor_writes[1].sType              = vk::StructureType::eWriteDescriptorSet; //K_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
         descriptor_writes[1].dstSet             = descriptor_sets[i];
-        descriptor_writes[1].dstBinding         = 1;
+        descriptor_writes[1].dstBinding         = 2;
         descriptor_writes[1].dstArrayElement    = 0;
         descriptor_writes[1].descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptor_writes[1].descriptorCount    = noise_images.size();
-        descriptor_writes[1].pImageInfo         = noise_images.data();
-
-        descriptor_writes[2].sType              = vk::StructureType::eWriteDescriptorSet; //K_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptor_writes[2].dstSet             = descriptor_sets[i];
-        descriptor_writes[2].dstBinding         = 2;
-        descriptor_writes[2].dstArrayElement    = 0;
-        descriptor_writes[2].descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-        descriptor_writes[2].descriptorCount    = 1;
-        descriptor_writes[2].pImageInfo         = &texture_info;
+        descriptor_writes[1].descriptorCount    = 1;
+        descriptor_writes[1].pImageInfo         = &texture_info;
         
         device.updateDescriptorSets( static_cast<uint32_t>( descriptor_writes.size() ), descriptor_writes.data(), 0, nullptr );
         

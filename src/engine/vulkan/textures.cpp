@@ -16,9 +16,9 @@ void BaseApp::create_texture_image() {
         throw std::runtime_error( "failed to load texture image!" );
     }
 
-    chunk_tree->generate_noise_textures( this );
+    //chunk_tree->generate_noise_textures( this );
     free(noise_pixels);
-    texture = Texture( this, pixels, tex_width, tex_height );
+    texture = Texture( this, pixels, tex_width, tex_height, 1 );
 
 }
 
