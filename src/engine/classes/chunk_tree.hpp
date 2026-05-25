@@ -30,7 +30,8 @@ private:
 
         uint32_t index;
 
-        bool dirty;
+        bool dirty = false;
+        bool is_leaf = false;
 
         const int64_t   recursion_limit  = 20;
         const int64_t   min_size         = 16;
@@ -63,17 +64,14 @@ private:
         
         void collapse( uint32_t _new_index );
 
-        bool is_leaf() {
-            return children[0] == nullptr;
-        }
-
+        void collapse_branch();
         
-
+        bool has_children() { return children[0] != nullptr; }
         //std::unique_ptr<QuadTree> create_child( int local_i, int local_j );
 
     };
     
-    void subdivide_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node );
+    void update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node );
 
     std::shared_ptr<QuadTree::Node> top_node;
     std::vector<std::shared_ptr<QuadTree::Node>> leaves;
@@ -84,10 +82,12 @@ private:
     uint64_t leaf_count = 1;
 
     Texture noise_texture;
+
+    void flush_dirty();
     
 public:
 
-    void generate();
+    void generate( glm::vec3 _eye_pos );
 
     struct LeafInfo {
 
@@ -149,8 +149,6 @@ public:
     void update( glm::vec3 _eye_pos );
 
     void calculate_noise( u_char* _dest );
-
-    void delete_children();
 
     void update_tree_size();
 

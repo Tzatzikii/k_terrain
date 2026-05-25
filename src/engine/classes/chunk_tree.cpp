@@ -5,31 +5,48 @@
 
 namespace ec {
 
-void QuadTree::generate() {
+void QuadTree::generate( glm::vec3 _eye_pos ) {
     top_node = std::make_shared<QuadTree::Node>(0, 0, 1024);
-    subdivide_node( glm::vec3{0, 0, 0}, top_node );
+    update_node( _eye_pos, top_node );
 }
 
-void QuadTree::subdivide_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node ) {
+void QuadTree::update( glm::vec3 _eye_pos ) {
+    // for( int i = 0; i < leaves.size(); i++ ) {
+    //     auto leaf = leaves[i];
+    //     std::cout << i << std::endl;
+    //     update_node( _eye_pos, leaf );
+    // }
+    update_node(_eye_pos, top_node);
+}
+
+void QuadTree::update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node ) {
     float dx = _eye_pos.x - _node->cx;
     float dy = _eye_pos.y - _node->cy;
     float dist = std::sqrt(dx*dx + dy*dy);
-    if( _node->is_divisible( dist )) {
+    if( _node->is_divisible( dist ) && !_node->dirty ) {
         _node->subdivide( _eye_pos );
         for( auto child : _node->children ) {
-            subdivide_node( _eye_pos, child );
+            update_node( _eye_pos, child );
         }
     }
-    else {
+    else{
         _node->collapse( id_tracker++ );
-        leaves.push_back(_node);
+        if(std::find(leaves.begin(), leaves.end(), _node) == leaves.end()) {
+            leaves.push_back(_node);
+        }
+        
     }
 
+}
+
+void QuadTree::flush_dirty() {
+    
 }
 
 std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
     std::vector<ec::QuadTree::LeafInfo> leaf_infos;
     for( auto leaf : leaves ) {
+        if(leaf->dirty || !leaf->is_leaf) continue; // temporary
         LeafInfo info;
         info.pos = glm::vec2( leaf->cx, leaf->cy );
         info.size = leaf->size;
@@ -37,12 +54,25 @@ std::vector<ec::QuadTree::LeafInfo> QuadTree::get_leaf_infos() {
         info.tess_edges[0] = info.tess_edges[1] = info.tess_edges[2] = info.tess_edges[3] = 0;
         leaf_infos.push_back(info);
     }
+    static auto log = leaf_infos.size();
+    if( leaf_infos.size() != log ) {
+        std::cout << leaf_infos.size() << " / " << leaves.size() << std::endl;
+        log = leaf_infos.size();
+    }
     return leaf_infos;
 }
 
 void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
-
+    is_leaf = false;
     int index = 0;
+
+    if( this->has_children() ) {
+        this->children[0]->dirty = false;
+        this->children[1]->dirty = false;
+        this->children[2]->dirty = false;
+        this->children[3]->dirty = false;
+        return;
+    }
 
     for( int i = -1; i <= 1; i+=2 ) {
 
@@ -59,104 +89,22 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
     
 }
 
-// std::unique_ptr<QuadTree> QuadTree::create_child( int _local_i, int _local_j ) {
-
-//     int64_t next_cx = cx+_local_i*static_cast<int64_t>(size/4);
-//     int64_t next_cy = cy+_local_j*static_cast<int64_t>(size/4);
-//     int64_t next_size = size/2;
-//     std::unique_ptr<QuadTree> next = std::make_unique<QuadTree>( next_cx, next_cy, next_size, level+1 );
-//     return next;
-    
-// }   
-
-
-// void QuadTree::get_noise_views( std::vector<vk::ImageView>& _views ) {
-//     if( this->is_leaf() ) {
-//         _views.push_back( noise_texture.get_view() );
-//     }
-//     else {
-//         this->children[0]->get_noise_views(_views);
-//         this->children[1]->get_noise_views(_views);
-//         this->children[2]->get_noise_views(_views);
-//         this->children[3]->get_noise_views(_views);
-//     }
-// }
-
-// void QuadTree::set_textures( Texture& _texture ) {
-//     if( this->is_leaf() ) {
-//         this->noise_texture = _texture;
-//         this->noise_texture.create_view( vk::ImageAspectFlagBits::eColor );
-//     }
-//     else {
-//         this->children[0]->set_textures(_texture);
-//         this->children[1]->set_textures(_texture);
-//         this->children[2]->set_textures(_texture);
-//         this->children[3]->set_textures(_texture);
-//     }
-// }
-
-// void QuadTree::update( glm::vec3 _eye_pos ) {
-//     bool changed = false;
-//     glm::vec3 pos = _eye_pos;
- 
-//     float dx = std::abs(pos.x - cx);
-//     float dy = std::abs(pos.y - cy);
-//     float dist = std::sqrt( dx*dx + dy*dy );
-//    // float threshold = size * 4;
-
-//     if( !this->is_divisible( dist ) ) {
-//         this->make_leaf();
-        
-//         return;
-//     }
-//     this->subdivide( pos );
-//     this->update_children( pos );
-//     this->update_tree_size();
-// }
-
-// void QuadTree::update_tree_size() {
-//     if( this->has_children() ) {
-//         leaf_count = 0;
-//         for( auto& child : children ) {
-//             child->update_tree_size();
-//             leaf_count += child->leaf_count;
-//         }
-//     }
-//     // if a chunk doesn't have children it is a leaf, in
-//     // which case the ChunkTree::make_leaf function assigns
-//     // a leaf_count of 1, so no need to handle that again
-// }
-
-// void QuadTree::update_children( glm::vec3 _eye_pos ) {
-//     if( this->is_leaf() ) {
-//         return;
-//     }
-//     for( auto& child : children ) {
-//         child->update( _eye_pos );
-//     }
-//     std::cout << "made leaf, coords: " << cx << " : " << cy << std::endl;
-// }
-
-// void QuadTree::delete_children() {
-
-//     if( !this->has_children() ) {
-//         return;
-//     }
-
-//     for( int i = 0; i < 4; i++ ) {
-//         children[i]->clean();
-//         children[i].release();
-//     } 
-
-// }
-
-
 void QuadTree::Node::collapse( uint32_t _new_index ) {
+    if(!this->dirty) { index = _new_index; }
+    collapse_branch();
+    this->dirty = false; // un-dirt the top of the branch
+    this->is_leaf = true;
+   
+}
 
-    //this->delete_children();
-    this->dirty = true;
-    index = _new_index;
-    //leaf_count = 1;
+void QuadTree::Node::collapse_branch() {
+    if( this->has_children() ) {
+        this->children[0]->collapse_branch();
+        this->children[1]->collapse_branch();
+        this->children[2]->collapse_branch();
+        this->children[3]->collapse_branch();
+    }
+    dirty = true;
 }
 
 void QuadTree::Node::calculate_noise( u_char* _dest ) {
