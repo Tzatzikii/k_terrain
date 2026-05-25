@@ -12,14 +12,19 @@ layout(binding = 0) uniform MVP {
 } mvp;
 
 layout(location = 1) in vec2 inTexCoord[];
+layout(location = 2) patch in uint inInstanceIndex;
+layout(location = 3) patch in vec2 inInstanceCenter;
+layout(location = 4) patch in float inInstanceSize;
 
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out float height;
+layout(location = 4) out float outInstanceSize;
 //layout(binding = 1) uniform sampler2D noises[136];
 layout(binding = 2) uniform sampler2D texSampler;
 
 
 void main() {
+    outInstanceSize = inInstanceSize;
     float u = clamp(gl_TessCoord.x, 0.0, 1.0);
     float v = clamp(gl_TessCoord.y, 0.0, 1.0);
 
@@ -59,8 +64,9 @@ void main() {
     vec4 normal = normalize( vec4(cross(uVec.xyz, vVec.xyz), 0) );
 
     p.z += height;
+    p.xy += inInstanceCenter;
     
-    gl_Position = mvp.proj * mvp.view * mvp.model * p;
+    gl_Position = mvp.proj * mvp.view * p;
 
 
 }

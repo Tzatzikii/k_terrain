@@ -151,6 +151,14 @@ public:
                 {1, 1, 1, 0}
             }
         );
+        instances.push_back(
+            {
+                1,
+                glm::vec2(0, 1),
+                8.0f,
+                {1, 0, 1, 1}
+            }
+        );
     }
 
 private:
@@ -237,7 +245,7 @@ private:
 
         command_buffer.bindDescriptorSets( vk::PipelineBindPoint::eGraphics, pipeline_layout, 0, 1, &descriptor_sets[current_frame], 0, nullptr );
 
-        command_buffer.drawIndexed( static_cast<uint32_t>( indices.size() ), quad_tree.get_leaf_count(), 0, 0, 0 );
+        command_buffer.drawIndexed( static_cast<uint32_t>( indices.size() ), instances.size(), 0, 0, 0 );
         
         command_buffer.endRenderPass();
 
