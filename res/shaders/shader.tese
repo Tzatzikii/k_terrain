@@ -17,13 +17,15 @@ layout(location = 3) patch in vec2 inInstanceCenter;
 layout(location = 4) patch in float inInstanceSize;
 
 layout(location = 1) out vec2 fragTexCoord;
-layout(location = 2) out float height;
+//layout(location = 2) out float height;
+layout(location = 2) flat out uint outInstanceIndex;
 layout(location = 4) out float outInstanceSize;
 layout(binding = 1) uniform sampler2D texSampler;
 layout(binding = 2) uniform sampler2DArray noises;
 
 
 void main() {
+    outInstanceIndex = inInstanceIndex;
     outInstanceSize = inInstanceSize;
     float u = clamp(gl_TessCoord.x, 0.0, 1.0);
     float v = clamp(gl_TessCoord.y, 0.0, 1.0);
@@ -53,8 +55,10 @@ void main() {
     float dist = sqrt( p.x*p.x + p.y*p.y );
 
     // lookup texel at patch coordinate for height and scale + shift as desired
-    //height = textureLod(noises[inInstanceIndex], texCoord, 0.0).r * 256.0;
-    height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 64.0;
+    //height = texture(noises[inInstanceIndex], texCoord).r * 256.0;
+    float height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 256.0;
+    //height = pow(height * 64.0, 2.0) - 256.0;
+    //float height = -5.0;
     //height = floor(height);
     //height = 0;
     //height = dist/2.0;

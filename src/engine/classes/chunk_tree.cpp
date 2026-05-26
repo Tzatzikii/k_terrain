@@ -31,9 +31,11 @@ void QuadTree::update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> 
             update_node( _eye_pos, child );
         }
     }
-    else if( !_node->is_leaf ){
+    else if( !_node->is_leaf && !_node->dirty ){
         _node->collapse(index_pool);
-        _node->index = index_pool.get();
+        if(_node->index == -1) {
+            _node->index = index_pool.get();
+        }
         
         if(std::find(leaves.begin(), leaves.end(), _node) == leaves.end()) {
             leaves.push_back(_node);
@@ -140,9 +142,9 @@ void QuadTree::Node::subdivide( glm::vec3 _eye_pos ) {
         return;
     }
     int iter = 0;
+    for( int j = -1; j <= 1; j+=2 ) {
     for( int i = -1; i <= 1; i+=2 ) {
 
-        for( int j = -1; j <= 1; j+=2 ) {
             //auto next = create_child(i, j);
             int64_t next_cx = cx+i*static_cast<int64_t>(size/4);
             int64_t next_cy = cy+j*static_cast<int64_t>(size/4);
@@ -176,6 +178,36 @@ void QuadTree::Node::collapse_branch( IndexPool& _index_pool ) {
 
 }
 
+float debug_pattern(int x, int y,
+                    int width,
+                    int height)
+{
+    float nx =
+        (float)x / width;
+
+    float ny =
+        (float)y / height;
+
+    float cx = nx * 2.0f - 1.0f;
+    float cy = ny * 2.0f - 1.0f;
+
+    float dist =
+        std::sqrt(cx * cx + cy * cy);
+
+    float radial =
+        std::sin(dist * 50.0f);
+
+    float gradientX = nx;
+    float gradientY = ny;
+
+    float result =
+        radial * 0.5f +
+        gradientX * 0.25f +
+        gradientY * 0.25f;
+
+    return std::clamp(result, 0.0f, 1.0f);
+}
+
 void QuadTree::Node::calculate_noise( u_char* _dest ) {
     size_t noise_size = 64;
     FastNoise noise;
@@ -197,11 +229,11 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
     float scale = 2.0/255.0; // map [-1;1] to [0;255]
     float ratio = static_cast<float>(this->size)/static_cast<float>(noise_size);
     
-    uint index = 0;
+    uint pixel_index = 0;
     for( uint i = 0; i < noise_size; i++ ) {
             for( uint j = 0; j < noise_size; j++ ) {
-                float u = (i + 0.5f) / static_cast<float>(noise_size);
-                float v = (j + 0.5f) / static_cast<float>(noise_size);
+                float u = (j + 0.5f) / static_cast<float>(noise_size);
+                float v = (i + 0.5f) / static_cast<float>(noise_size);
 
                 float world_x = center_x + (u - 0.5f) * size;
                 float world_y = center_y + (v - 0.5f) * size;
@@ -210,15 +242,17 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
                     world_x * frequency,
                     world_y * frequency
                 );
+               // float noise_value = std::sqrt(world_x*world_x+world_y*world_y)/2048;
                 u_char pixel = static_cast<u_char>(std::clamp( (noise_value+1.0f)/scale, 0.0f, 255.0f ));
                 assert(pixel >= 0 && pixel <= 255);
-                _dest[index++] = pixel;
-                _dest[index++] = pixel;
-                _dest[index++] = pixel;
-                _dest[index++] = 255;
+                _dest[pixel_index++] = pixel;
+                _dest[pixel_index++] = pixel;
+                _dest[pixel_index++] = pixel;
+                _dest[pixel_index++] = 255;
         }
     }
-    //std::memset( _dest, static_cast<char>(255), noise_size * noise_size * 4);
+    //std::cout << "color:" << ((static_cast<float>(index)/(255.0))) << std::endl;
+   // std::memset( _dest, static_cast<char>((static_cast<float>(index))), noise_size * noise_size * 4);
 }
 
 
@@ -235,7 +269,6 @@ Texture QuadTree::create_noise_texture( BaseApp* _current_app ) {
 
 void QuadTree::update_noise_texture( BaseApp* _current_app, Texture& _noise_texture ) {
     u_char* noise = new u_char[64 * 64 * 4];
-
 
     //noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
     auto b = _noise_texture.begin_write();

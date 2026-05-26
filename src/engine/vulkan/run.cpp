@@ -166,7 +166,7 @@ private:
     void key_events( float dt ) override {
         dt /= 1000.0f;
 
-        float speed = 1.0f*dt;
+        float speed = 5.0f*dt;
         if( keys_pressed[ GLFW_KEY_W ] ) {
             camera.forwards(speed);
         }

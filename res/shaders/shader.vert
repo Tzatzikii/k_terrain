@@ -14,7 +14,7 @@ layout(location = 4) in float inInstanceSize;
 layout(location = 5) in uvec4 inInstanceTessEdges;
 
 layout(location = 1) out vec2 outTexCoord;
-layout(location = 2) out uint outInstanceIndex;
+layout(location = 2) flat out uint outInstanceIndex;
 layout(location = 3) out vec2 outInstanceCenter;
 layout(location = 4) out float outInstanceSize;
 layout(location = 5) out uvec4 outInstanceTessEdges;

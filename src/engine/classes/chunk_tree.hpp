@@ -41,6 +41,7 @@ private:
             if(_index < 0) return;
             index_pool.push(_index);
         }
+        int32_t count() const { return next-1; } // the number of indices given so far
 
     };
 
