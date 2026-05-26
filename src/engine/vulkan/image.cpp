@@ -13,7 +13,7 @@ void Image2D::create( vk::PhysicalDevice& _physical_device, vk::Device& _device,
     image_info.extent.height = static_cast<uint32_t>( _properties.height );
     image_info.extent.depth  = 1;
     image_info.mipLevels     = _properties.mip_levels;
-    image_info.arrayLayers   = 1;
+    image_info.arrayLayers   = _properties.layer_count;
     image_info.format        = _properties.format;
     image_info.tiling        = _properties.tiling;
     image_info.initialLayout = vk::ImageLayout   ::eUndefined;  //VK_IMAGE_LAYOUT_UNDEFINED;
@@ -54,9 +54,9 @@ void Image2D::transition_layout( vk::CommandBuffer& _cmd_buffer, vk::ImageLayout
     barrier.image               = this->vk_image;
     barrier.subresourceRange.aspectMask     = vk::ImageAspectFlagBits::eColor; //VK_IMAGE_ASPECT_COLOR_BIT;
     barrier.subresourceRange.baseMipLevel   = 0;
-    barrier.subresourceRange.levelCount     = this->properties.mip_levels;
+    barrier.subresourceRange.levelCount     = 1;//this->properties.mip_levels;
     barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount     = 1;
+    barrier.subresourceRange.layerCount     = properties.layer_count;
 
     if( 
         _old == vk::ImageLayout::eUndefined && //VK_IMAGE_LAYOUT_UNDEFINED &&
@@ -81,6 +81,17 @@ void Image2D::transition_layout( vk::CommandBuffer& _cmd_buffer, vk::ImageLayout
         destination_stage   = vk::PipelineStageFlagBits::eFragmentShader | 
                               vk::PipelineStageFlagBits::eTessellationEvaluationShader; //VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     }
+    else if(
+        _old == vk::ImageLayout::eShaderReadOnlyOptimal &&
+        _new == vk::ImageLayout::eTransferDstOptimal
+    ) {
+        barrier.srcAccessMask = vk::AccessFlagBits::eShaderRead;
+        barrier.dstAccessMask = vk::AccessFlagBits::eTransferWrite;
+
+        source_stage = vk::PipelineStageFlagBits::eFragmentShader | 
+                       vk::PipelineStageFlagBits::eTessellationEvaluationShader;
+        destination_stage = vk::PipelineStageFlagBits::eTransfer;
+    }
     else {
         throw std::invalid_argument( "unsupported layout transition!" );
     }
@@ -99,13 +110,13 @@ void Image2D::create_view( vk::ImageAspectFlags _aspect_flags ) {
     vk::ImageViewCreateInfo view_info{};
     view_info.sType     = vk::StructureType::eImageViewCreateInfo;//VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     view_info.image     = this->vk_image;
-    view_info.viewType  = vk::ImageViewType::e2D; //VK_IMAGE_VIEW_TYPE_2D;
+    view_info.viewType  = vk::ImageViewType::e2DArray; //VK_IMAGE_VIEW_TYPE_2D;
     view_info.format    = this->properties.format;
     view_info.subresourceRange.aspectMask       = _aspect_flags;
     view_info.subresourceRange.baseMipLevel     = 0;
     view_info.subresourceRange.levelCount       = 1;//properties.mip_levels;
     view_info.subresourceRange.baseArrayLayer   = 0;
-    view_info.subresourceRange.layerCount       = 1;
+    view_info.subresourceRange.layerCount       = properties.layer_count;
     
     if( device.createImageView( &view_info, nullptr, &view ) != vk::Result::eSuccess ) {
         throw std::runtime_error( "failed to create image view!" );
@@ -116,9 +127,9 @@ void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buf
     std::vector<vk::BufferImageCopy> regions{};
     for( int layer = 0; layer < properties.layer_count; layer++ ) {
         vk::BufferImageCopy region{};
-        region.bufferOffset         = 0;
-        region.bufferRowLength      = properties.width;
-        region.bufferImageHeight    = properties.height;
+        region.bufferOffset         = layer * properties.width * properties.height * 4;
+        region.bufferRowLength      = 0;
+        region.bufferImageHeight    = 0;
         
         region.imageSubresource.aspectMask      = vk::ImageAspectFlagBits::eColor; //VK_IMAGE_ASPECT_COLOR_BIT;
         region.imageSubresource.mipLevel        = 0;

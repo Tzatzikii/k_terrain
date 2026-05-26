@@ -10,22 +10,23 @@ void BaseApp::create_descriptor_set_layout() {
     mvp_layout_binding.stageFlags           = vk::ShaderStageFlagBits::eVertex |
                                               vk::ShaderStageFlagBits::eTessellationEvaluation;//VK_SHADER_STAGE_VERTEX_BIT;
     mvp_layout_binding.pImmutableSamplers   = nullptr;
-
-    vk::DescriptorSetLayoutBinding noise_sampler_layout_binding{};
-    noise_sampler_layout_binding.binding            = 2;
-    noise_sampler_layout_binding.descriptorCount    = quad_tree.get_leaf_count();
-    noise_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    noise_sampler_layout_binding.pImmutableSamplers = nullptr;
-    noise_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
-                                                vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
-                                                
+    
     vk::DescriptorSetLayoutBinding texture_sampler_layout_binding{};
-    texture_sampler_layout_binding.binding            = 3;
+    texture_sampler_layout_binding.binding            = 1;
     texture_sampler_layout_binding.descriptorCount    = 1;
     texture_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     texture_sampler_layout_binding.pImmutableSamplers = nullptr;
     texture_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
                                                  vk::ShaderStageFlagBits::eTessellationEvaluation;
+
+    vk::DescriptorSetLayoutBinding noise_sampler_layout_binding{};
+    noise_sampler_layout_binding.binding            = 2;
+    noise_sampler_layout_binding.descriptorCount    = 1;
+    noise_sampler_layout_binding.descriptorType     = vk::DescriptorType::eCombinedImageSampler; //VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    noise_sampler_layout_binding.pImmutableSamplers = nullptr;
+    noise_sampler_layout_binding.stageFlags         = vk::ShaderStageFlagBits::eFragment |
+                                                vk::ShaderStageFlagBits::eTessellationEvaluation; //VK_SHADER_STAGE_FRAGMENT_BIT;
+                                                
 
     std::array<vk::DescriptorSetLayoutBinding, 3> bindings = {
         mvp_layout_binding, noise_sampler_layout_binding, texture_sampler_layout_binding

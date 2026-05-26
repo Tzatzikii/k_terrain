@@ -16,7 +16,8 @@ void BaseApp::create_texture_image() {
         throw std::runtime_error( "failed to load texture image!" );
     }
 
-    //chunk_tree->generate_noise_textures( this );
+    noise_texture = quad_tree.create_noise_texture( this );
+    quad_tree.update_noise_texture( this, noise_texture );
     free(noise_pixels);
     texture = Texture( this, pixels, tex_width, tex_height, 1 );
 
@@ -118,9 +119,9 @@ void BaseApp::generate_mipmaps( vk::Image image, vk::Format image_format, int32_
 }
 
 void BaseApp::create_texture_image_view() {
-    // noise_texture.create_view( 
-    //     vk::ImageAspectFlagBits ::eColor
-    // );
+    noise_texture.create_view( 
+        vk::ImageAspectFlagBits ::eColor
+    );
     texture.create_view( 
         vk::ImageAspectFlagBits ::eColor
     );

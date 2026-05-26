@@ -19,6 +19,9 @@ private:
     vk::PhysicalDevice  physical_device;
     vk::Device          device;
     ec::Image2D         image;
+    vk::Buffer          staging_buffer;
+    vk::DeviceMemory    staging_buffer_memory;
+    void* data;
 
     int                 width;
     int                 height;
@@ -47,6 +50,7 @@ public:
     void create_view( vk::ImageAspectFlags _aspect_flags ) { image.create_view(_aspect_flags); }
 
     Texture& operator=( const Texture& other ) {
+        current_app = other.current_app;
         width               = other.width;
         height              = other.height;
         channels            = other.channels;
@@ -54,14 +58,19 @@ public:
         physical_device     = other.physical_device;
         device              = other.device;
         image               = other.image;
-        count              = other.count;
+        count               = other.count;
+        data                = other.data;
+        staging_buffer      = other.staging_buffer;
+        staging_buffer_memory = other.staging_buffer_memory;
         return *this;
     }
 
     void clean() {
         image.clean();
     }
-
+    vk::CommandBuffer begin_write();
+    void end_write( vk::CommandBuffer _cmd_buffer );
+    void write( vk::CommandBuffer _cmd_buffer, uint _offset, u_char* _pixels, size_t _size );
 
 };
 

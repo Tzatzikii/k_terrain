@@ -37,6 +37,7 @@ Texture::Texture(
         physical_device( _current_app->get_physical_device() ), 
         device( _current_app->get_device() ), 
         width(_width), 
+        height(_height),
         count(_count)
 {
     create_vk( _pixels);
@@ -52,23 +53,53 @@ stbi_uc* Texture::load_image( std::string _path ) {
     }
 }
 
+vk::CommandBuffer Texture::begin_write() {
+    vk::CommandBuffer cmd_buffer = current_app->begin_single_time_commands();
+    image.transition_layout(
+        cmd_buffer,
+        vk::ImageLayout ::eShaderReadOnlyOptimal,//VK_IMAGE_LAYOUT_UNDEFINED, 
+        vk::ImageLayout ::eTransferDstOptimal //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+    );
+    return cmd_buffer;
+}
+
+void Texture::end_write( vk::CommandBuffer _cmd_buffer ) {
+    image.transition_layout(
+        _cmd_buffer,
+        vk::ImageLayout::eTransferDstOptimal,
+        vk::ImageLayout::eShaderReadOnlyOptimal
+    );
+    current_app->end_single_time_commands( _cmd_buffer );
+}
+
+void Texture::write( vk::CommandBuffer _cmd_buffer, uint _offset, u_char* _pixels, size_t _size ) {
+    
+    std::memcpy( data + _offset, _pixels, _size ); 
+    
+
+    image.copy_from_buffer(
+        _cmd_buffer,
+        staging_buffer
+    );
+
+    
+}
+
 void Texture::create_vk( stbi_uc* _pixels ) {
 
     vk::CommandBuffer cmd_buffer = current_app->begin_single_time_commands();
 
     vk::DeviceSize image_size = width * height * 4;
-    vk::Buffer staging_buffer;
-    vk::DeviceMemory staging_buffer_memory;
+    
     current_app->create_buffer(
-        image_size, 
+        image_size * count,
         vk::BufferUsageFlagBits::eTransferSrc,
         vk::MemoryPropertyFlagBits::eHostCoherent,
         staging_buffer,
         staging_buffer_memory
     );
 
-    void * data;
-    device.mapMemory( staging_buffer_memory, 0, image_size, {}, &data );
+    data = device.mapMemory( staging_buffer_memory, 0, image_size );
     std::memcpy( data, _pixels, static_cast<size_t>( image_size ) );
 
     ec::ImageProperties properties{};
@@ -93,14 +124,19 @@ void Texture::create_vk( stbi_uc* _pixels ) {
 
     image.transition_layout(
         cmd_buffer,
-        vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
-        vk::ImageLayout ::eTransferDstOptimal //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+        vk::ImageLayout ::eUndefined, //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+        vk::ImageLayout ::eTransferDstOptimal//VK_IMAGE_LAYOUT_UNDEFINED, 
     );
+    // image.transition_layout(
+    //     cmd_buffer,
+    //     vk::ImageLayout ::eUndefined,//VK_IMAGE_LAYOUT_UNDEFINED, 
+    //     vk::ImageLayout ::eTransferDstOptimal //VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 
+    // );
 
-    image.copy_from_buffer(
-        cmd_buffer,
-        staging_buffer
-    );
+    // image.copy_from_buffer(
+    //     cmd_buffer,
+    //     staging_buffer
+    // );
 
     image.transition_layout(
         cmd_buffer,
@@ -108,8 +144,6 @@ void Texture::create_vk( stbi_uc* _pixels ) {
         vk::ImageLayout::eShaderReadOnlyOptimal
     );
     current_app->end_single_time_commands( cmd_buffer );
-    device.destroyBuffer(staging_buffer);
-    device.freeMemory(staging_buffer_memory);
 }
 
 

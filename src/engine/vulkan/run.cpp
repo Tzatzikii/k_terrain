@@ -182,6 +182,7 @@ private:
         if( keys_pressed[ GLFW_KEY_U ] ) {
             quad_tree.update(get_camera_pos());
             instances = quad_tree.get_leaf_infos();
+            quad_tree.update_noise_texture(this, noise_texture);
         }
     }
 

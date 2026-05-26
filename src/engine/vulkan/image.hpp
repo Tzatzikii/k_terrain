@@ -35,7 +35,7 @@ public:
     void transition_layout( vk::CommandBuffer& _cmd_buffer, vk::ImageLayout _old, vk::ImageLayout _new );
     void create_view( vk::ImageAspectFlags _aspect_flags );
     void copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer );
-
+    ImageProperties get_properties() { return properties; }
     void clean();
 };   
 

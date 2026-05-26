@@ -56,6 +56,8 @@ private:
 
         int32_t index;
 
+        bool has_noise = false;
+
         bool dirty = false;
         bool is_leaf = false;
 
@@ -107,8 +109,6 @@ private:
     IndexPool index_pool;
 
     uint64_t leaf_count = 1;
-
-    Texture noise_texture;
 
     void flush_dirty();
 
@@ -169,11 +169,16 @@ public:
 
     std::vector<LeafInfo> get_leaf_infos();
 
-    uint64_t get_leaf_count() { return leaf_count; }
+    uint64_t get_leaf_count() { return get_leaf_infos().size(); } // this could 100% be done a lot more efficiently, I'm just lazy
 
     void get_noise_views( std::vector<vk::ImageView>& _views );
 
-    Texture generate_noise_texture(
+    void update_noise_texture(
+        BaseApp* _current_app,
+        Texture& _texture
+    );
+
+    Texture create_noise_texture(
         BaseApp* _current_app
     );
     void update( glm::vec3 _eye_pos );

@@ -19,8 +19,8 @@ layout(location = 4) patch in float inInstanceSize;
 layout(location = 1) out vec2 fragTexCoord;
 layout(location = 2) out float height;
 layout(location = 4) out float outInstanceSize;
-//layout(binding = 1) uniform sampler2D noises[136];
-layout(binding = 2) uniform sampler2D texSampler;
+layout(binding = 1) uniform sampler2D texSampler;
+layout(binding = 2) uniform sampler2DArray noises;
 
 
 void main() {
@@ -53,9 +53,10 @@ void main() {
     float dist = sqrt( p.x*p.x + p.y*p.y );
 
     // lookup texel at patch coordinate for height and scale + shift as desired
-    //height = textureLod(noises[nonuniformEXT(chunkIndex)], texCoord, 0.0).r * 256.0;
+    //height = textureLod(noises[inInstanceIndex], texCoord, 0.0).r * 256.0;
+    height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 64.0;
     //height = floor(height);
-    height = 0;
+    //height = 0;
     //height = dist/2.0;
 
     // compute patch surface normal
@@ -63,7 +64,7 @@ void main() {
     vec4 vVec = p10 - p00;
     vec4 normal = normalize( vec4(cross(uVec.xyz, vVec.xyz), 0) );
 
-    p.z += height + log(float(inInstanceIndex));
+    p.z += height; //+ log(float(inInstanceIndex));
     p.xy += inInstanceCenter;
     
     gl_Position = mvp.proj * mvp.view * p;

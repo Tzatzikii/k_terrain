@@ -7,6 +7,7 @@ namespace ec {
 
 void QuadTree::generate( glm::vec3 _eye_pos ) {
     top_node = std::make_shared<QuadTree::Node>(0, 0, 65536);
+    
     update_node( _eye_pos, top_node );
     
 }
@@ -176,7 +177,7 @@ void QuadTree::Node::collapse_branch( IndexPool& _index_pool ) {
 }
 
 void QuadTree::Node::calculate_noise( u_char* _dest ) {
-    size_t noise_size = 128;
+    size_t noise_size = 64;
     FastNoise noise;
 
     noise.SetNoiseType( FastNoise::NoiseType::PerlinFractal );
@@ -217,15 +218,36 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
                 _dest[index++] = 255;
         }
     }
-    std::memset( _dest, static_cast<char>(0), noise_size * noise_size * 4);
+    //std::memset( _dest, static_cast<char>(255), noise_size * noise_size * 4);
 }
 
-Texture QuadTree::generate_noise_texture( BaseApp* _current_app ) {
-    u_char* pixels = new u_char[leaf_count * 4];
 
+Texture QuadTree::create_noise_texture( BaseApp* _current_app ) {
+    u_char* pixels = new u_char[64 * 64 * 4 * 4096]; // ~7 megabytes
 
+    // This solution is temporary. I don't need the pixels anymore
+    Texture noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
     
     delete[] pixels;
+    return noise_texture;
+}
+
+
+void QuadTree::update_noise_texture( BaseApp* _current_app, Texture& _noise_texture ) {
+    u_char* noise = new u_char[64 * 64 * 4];
+
+
+    //noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
+    auto b = _noise_texture.begin_write();
+    for( auto node : leaves ) {
+        if( node->has_noise ) continue;
+        node->calculate_noise( noise );
+        _noise_texture.write( b, node->index*64*64*4, noise, 64*64*4);
+        node->has_noise = true;
+    }
+    _noise_texture.end_write(b);
+    delete[] noise;
+
 }
 
     
