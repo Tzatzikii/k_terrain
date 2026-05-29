@@ -6,7 +6,7 @@
 #include <vector>
 #include <queue>
 #include <iostream>
-#include "../math/vertex.hpp"
+#include "../classes/vertex.hpp"
 #include "../etc/header_libs.hpp"
 #include "../vulkan/texture.hpp"
 

@@ -2,7 +2,7 @@
 #define SRC_ENGINE_CLASSES_CHUNK_HPP
 
 #include <array>
-#include "../math/vertex.hpp"
+#include "../classes/vertex.hpp"
 
 namespace ec {
 

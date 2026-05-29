@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdint.h>
 #include "../etc/header_libs.hpp"
-#include "../math/vertex.hpp"
+#include "../classes/vertex.hpp"
 
 
 namespace ec {

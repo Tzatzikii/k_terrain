@@ -11,7 +11,7 @@
 #include <set>
 #include "../etc/helpers.hpp"
 #include "../etc/constants.hpp"
-#include "../math/vertex.hpp"
+#include "../classes/vertex.hpp"
 #include "../classes/terrain.hpp"
 #include "../classes/camera.hpp"
 #include "../classes/chunk_tree.hpp"
