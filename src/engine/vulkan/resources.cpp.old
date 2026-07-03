@@ -43,7 +43,7 @@ ec::QueueFamilyIndices BaseApp::find_queue_families( vk::PhysicalDevice device )
     QueueFamilyIndices indices;
 
     std::vector<vk::QueueFamilyProperties> queue_families = device.getQueueFamilyProperties();    
-    int i = 0;
+    int32_t i = 0;
     for( const auto& queue_family : queue_families ) {
         if( queue_family.queueFlags & vk::QueueFlagBits::eGraphics ) {
             indices.graphics_family = i;
@@ -438,7 +438,7 @@ vk::Extent2D BaseApp::choose_swap_extent( const vk::SurfaceCapabilitiesKHR capab
         return capabilities.currentExtent;
     }
     else {
-        int width, height;
+        int32_t width, height;
         glfwGetFramebufferSize( window, &width, &height );
 
         VkExtent2D actualExtent = {
@@ -509,7 +509,7 @@ void BaseApp::create_swapchain() {
 }
 
 void BaseApp::recreate_swapchain() {
-    int width = 0, height = 0;
+    int32_t width = 0, height = 0;
     glfwGetFramebufferSize( window, &width, &height );
 
     while( width == 0 || height == 0 ) {
@@ -720,7 +720,7 @@ void BaseApp::create_render_pass() {
     depth_attachment_ref.layout     = vk::ImageLayout::eDepthStencilAttachmentOptimal; //VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     vk::SubpassDescription subpass{};
-    subpass.pipelineBindPoint       = vk::PipelineBindPoint::eGraphics; //VK_PIPELINE_BIND_POINT_GRAPHICS;
+    subpass.pipelineBindPoint32_t       = vk::PipelineBindPoint::eGraphics; //VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount    = 1;
     subpass.pColorAttachments       = &color_attachment_ref;
     subpass.pDepthStencilAttachment = &depth_attachment_ref;
@@ -1126,7 +1126,7 @@ void BaseApp::create_command_pool() {
 #pragma region
 
 void BaseApp::create_texture_image() {
-    int tex_width, tex_height, tex_channels;
+    int32_t tex_width, tex_height, tex_channels;
     stbi_uc * pixels = stbi_load( TEXTURE_PATH.c_str(), &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha );
     vk::DeviceSize image_size = tex_width * tex_height * 4;
 

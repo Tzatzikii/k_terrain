@@ -20,4 +20,5 @@ void main() {
     // outColor = vec4(.5, .5, .5, 1.0);
     // outColor = vec4(fragTexCoord, 0.0, 1.0);
     outColor = texture(noiseSampler, vec3(fragTexCoord, float(inInstanceIndex)));
+    //outColor = vec4(fragTexCoord.xy, 1.0, 1.0);
 }

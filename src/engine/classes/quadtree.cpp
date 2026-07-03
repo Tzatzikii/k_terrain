@@ -50,7 +50,7 @@ void Quadtree::update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> 
 
 void Quadtree::flush_dirty() {
 
-    for( int i = leaves.size() - 1; i >= 0; i--) {
+    for( int32_t i = leaves.size() - 1; i >= 0; i--) {
 
         if(leaves[i]->dirty) {
 
@@ -76,7 +76,7 @@ std::vector<ec::Quadtree::LeafInfo> Quadtree::get_leaf_infos() {
         info.size = leaf->size;
         info.index = leaf->index;
 
-        for( int i = 0; i < 4; i++ ) {
+        for( int32_t i = 0; i < 4; i++ ) {
             info.tess_edges[i] = is_edge(leaf, i);    
         }
 
@@ -99,7 +99,7 @@ std::vector<ec::Quadtree::LeafInfo> Quadtree::get_leaf_infos() {
 }
 
 
-int Quadtree::is_edge( std::shared_ptr<Node> _node, int _side_index ) {
+int32_t Quadtree::is_edge( std::shared_ptr<Node> _node, int32_t _side_index ) {
 
     auto closest = leaves[0];
     glm::vec2 closest_pos = { closest->cx, closest->cy };
@@ -160,9 +160,9 @@ void Quadtree::Node::subdivide( glm::vec3 _eye_pos ) {
         this->children[3]->dirty = false;
         return;
     }
-    int iter = 0;
-    for( int j = -1; j <= 1; j+=2 ) {
-    for( int i = -1; i <= 1; i+=2 ) {
+    int32_t iter = 0;
+    for( int32_t j = -1; j <= 1; j+=2 ) {
+    for( int32_t i = -1; i <= 1; i+=2 ) {
 
             //auto next = create_child(i, j);
             int64_t next_cx = cx+i*static_cast<int64_t>(size/4);
@@ -196,9 +196,9 @@ void Quadtree::Node::collapse_branch( IndexPool& _index_pool ) {
 
 }
 
-float debug_pattern(int x, int y,
-                    int width,
-                    int height)
+float debug_pattern(int32_t x, int32_t y,
+                    int32_t width,
+                    int32_t height)
 {
     float nx =
         (float)x / width;
@@ -271,6 +271,7 @@ void Quadtree::Node::calculate_noise( uint8_t* _dest ) {
     }
     //std::cout << "color:" << ((static_cast<float>(index)/(255.0))) << std::endl;
     //std::memset( _dest, static_cast<char>((static_cast<float>(index))), noise_size * noise_size * 4);
+    //std::memset( _dest, static_cast<uint8_t>(100), noise_size * noise_size * 4 );
 }
 
 

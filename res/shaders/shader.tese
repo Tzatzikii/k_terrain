@@ -3,7 +3,7 @@
 precision highp float;
 precision highp sampler2D;
 
-layout(quads, fractional_even_spacing, ccw) in;
+layout(quads, fractional_even_spacing, cw) in;
 
 layout(binding = 0) uniform MVP {
     mat4 model;
@@ -56,14 +56,7 @@ void main() {
     fragTexCoord = texCoord;
     float dist = sqrt( p.x*p.x + p.y*p.y );
 
-    // lookup texel at patch coordinate for height and scale + shift as desired
-    //height = texture(noises[inInstanceIndex], texCoord).r * 256.0;
-    float height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 256 - 64;
-    //height = pow(height * 64.0, 2.0) - 256.0;
-    //float height = -5.0;
-    //height = floor(height);
-    //height = 0;
-    //height = dist/2.0;
+    float height = texture(noises, vec3(gl_TessCoord.xy, float(inInstanceIndex))).r * 256 - 64;
 
     // compute patch surface normal
     vec4 uVec = p01 - p00;
@@ -72,7 +65,7 @@ void main() {
 
     p.z += height; //+ log(float(inInstanceIndex));
     
-    
+    fragTexCoord = gl_TessCoord.xy;
     gl_Position = mvp.proj * mvp.view * p;
 
 

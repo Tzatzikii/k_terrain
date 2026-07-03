@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-const int MAX_FRAMES_IN_FLIGHT = 2;
+const int32_t MAX_FRAMES_IN_FLIGHT = 2;
 
 const uint32_t WIDTH = 800;//2880;
 const uint32_t HEIGHT = 600;//1920;

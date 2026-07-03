@@ -29,9 +29,9 @@ Texture::Texture(
 Texture::Texture( 
     BaseApp*            _current_app,
     unsigned char*      _pixels, 
-    int                 _width, 
-    int                 _height,
-    int                 _count = 1
+    int32_t                 _width, 
+    int32_t                 _height,
+    int32_t                 _count = 1
 )
     :   current_app(_current_app), 
         physical_device( _current_app->get_physical_device() ), 

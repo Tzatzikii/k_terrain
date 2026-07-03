@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/var/home/gabork/Documents/Dev/Cpp/Vulkan/onlab",
-      "program": "/var/home/gabork/Documents/Dev/Cpp/Vulkan/onlab/bin/app",
+      "cwd": "..",
+      "program": "${workspaceRoot}/build/KTerrain",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

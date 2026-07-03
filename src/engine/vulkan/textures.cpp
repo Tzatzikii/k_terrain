@@ -6,7 +6,7 @@
 namespace ec {
 
 void BaseApp::create_texture_image() {
-    int tex_width, tex_height, tex_channels;
+    int32_t tex_width, tex_height, tex_channels;
     stbi_uc * pixels = stbi_load( "res/textures/grass.jpg", &tex_width, &tex_height, &tex_channels, STBI_rgb_alpha );
     vk::DeviceSize image_size = tex_width * tex_height * 4;
     unsigned char* noise_pixels = new unsigned char[image_size];

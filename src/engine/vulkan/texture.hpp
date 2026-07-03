@@ -23,11 +23,11 @@ private:
     vk::DeviceMemory    staging_buffer_memory;
     void* data;
 
-    int                 width;
-    int                 height;
-    int                 channels;
-    int                 mip_levels = 1;
-    int                 count;
+    int32_t                 width;
+    int32_t                 height;
+    int32_t                 channels;
+    int32_t                 mip_levels = 1;
+    int32_t                 count;
 
     void create_vk( stbi_uc* _pixels );
     stbi_uc* load_image( std::string _path );
@@ -42,9 +42,9 @@ public:
     Texture( 
         BaseApp*            _current_app,
         unsigned char*      _pixels, 
-        int                 _width, 
-        int                 _height,
-        int                 _count
+        int32_t                 _width, 
+        int32_t                 _height,
+        int32_t                 _count
     );
     vk::ImageView get_view() { return image.get_view(); }
     void create_view( vk::ImageAspectFlags _aspect_flags ) { image.create_view(_aspect_flags); }

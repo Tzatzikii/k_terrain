@@ -265,7 +265,7 @@ private:
 
 
 } // namespace ec
-int main() {
+int32_t main() {
     
     ec::TestApp app = ec::TestApp();
     app.run();

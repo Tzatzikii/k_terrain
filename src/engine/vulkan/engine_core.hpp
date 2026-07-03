@@ -38,7 +38,7 @@ public:
     );
     virtual void key_events( float delta ) = 0;
     virtual void cursor_events( double xpos, double ypos ) = 0;
-    void glfw_key_callback( GLFWwindow* window, int key, int scancode, int action, int mods );
+    void glfw_key_callback( GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods );
     void glfw_cursor_callback( GLFWwindow* window, double xpos, double ypos );
     vk::Device get_device() const {
         return device;
@@ -257,7 +257,7 @@ protected:
     void recreate_vertex_buffer();
 
     static bool check_validation_layer_support();
-    static void framebuffer_resize_callback( GLFWwindow * window, int width, int height ) {
+    static void framebuffer_resize_callback( GLFWwindow * window, int32_t width, int32_t height ) {
         auto app = reinterpret_cast<BaseApp*>( glfwGetWindowUserPointer( window ));
         app->framebuffer_resized = true;
     }

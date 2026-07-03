@@ -38,7 +38,7 @@ ec::QueueFamilyIndices BaseApp::find_queue_families( vk::PhysicalDevice device )
     QueueFamilyIndices indices;
 
     std::vector<vk::QueueFamilyProperties> queue_families = device.getQueueFamilyProperties();    
-    int i = 0;
+    int32_t i = 0;
     for( const auto& queue_family : queue_families ) {
         if( queue_family.queueFlags & vk::QueueFlagBits::eGraphics ) {
             indices.graphics_family = i;

@@ -3,7 +3,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "make -j12",
+            "command": "cmake --build build",
             "problemMatcher": []
         }
     ]

@@ -93,7 +93,7 @@ private:
         void collapse_branch( IndexPool& _index_pool );
         
         bool has_children() { return children[0] != nullptr; }
-        //std::unique_ptr<Quadtree> create_child( int local_i, int local_j );
+        //std::unique_ptr<Quadtree> create_child( int32_t local_i, int32_t local_j );
 
     };
 
@@ -110,7 +110,7 @@ private:
 
     void flush_dirty();
 
-    int is_edge( std::shared_ptr<Node> _node, int _side_index );
+    int32_t is_edge( std::shared_ptr<Node> _node, int32_t _side_index );
 
     friend bool compare_node_dist();
     
@@ -145,7 +145,7 @@ public:
             descs[2].offset = offsetof( LeafInfo, size );
             descs[3].format = vk::Format::eR32G32B32A32Uint;
             descs[3].offset = offsetof( LeafInfo, tess_edges );
-            for( int i = 0; i < 4; i++ ) {
+            for( int32_t i = 0; i < 4; i++ ) {
                 descs[i].binding = 1;
                 descs[i].location = i+ec::vertex::get_attribute_descriptions().size();
             }

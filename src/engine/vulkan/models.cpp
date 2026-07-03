@@ -46,10 +46,10 @@ void BaseApp::load_model( std::string path ) {
     //     }
     // }
 
-    vertices.push_back( vertex{glm::vec3(-0.5, -0.5, 0), glm::vec2(0, 0)});
-    vertices.push_back( vertex{glm::vec3(-0.5, 0.5, 0), glm::vec2(0, 1)});
-    vertices.push_back( vertex{glm::vec3(0.5, -0.5, 0), glm::vec2(1, 0)});
-    vertices.push_back( vertex{glm::vec3(0.5, 0.5, 0), glm::vec2(1, 1)});
+    vertices.push_back({{-0.5f, -0.5f, 0}, {0, 0}}); // 0 bottom-left
+    vertices.push_back({{ 0.5f, -0.5f, 0}, {1, 0}}); // 1 bottom-right
+    vertices.push_back({{-0.5f,  0.5f, 0}, {0, 1}}); // 2 top-left
+    vertices.push_back({{ 0.5f,  0.5f, 0}, {1, 1}}); // 3 top-right
     indices.push_back(0);
     indices.push_back(1);
     indices.push_back(2);

@@ -125,7 +125,7 @@ void Image2D::create_view( vk::ImageAspectFlags _aspect_flags ) {
 
 void Image2D::copy_from_buffer( vk::CommandBuffer& _cmd_buffer, vk::Buffer& _buffer ) {   
     std::vector<vk::BufferImageCopy> regions{};
-    for( int layer = 0; layer < properties.layer_count; layer++ ) {
+    for( int32_t layer = 0; layer < properties.layer_count; layer++ ) {
         vk::BufferImageCopy region{};
         region.bufferOffset         = layer * properties.width * properties.height * 4;
         region.bufferRowLength      = 0;

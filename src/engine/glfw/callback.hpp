@@ -8,7 +8,7 @@
 
 namespace ec {
 
-void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods );
+void key_callback( GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods );
 void cursor_callback( GLFWwindow* window, double xpos, double ypos );
 
 }

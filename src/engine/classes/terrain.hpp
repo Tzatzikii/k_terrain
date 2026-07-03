@@ -16,7 +16,7 @@ public:
     }
     void get_model( std::vector<ec::vertex>& ret_vertices, std::vector<uint32_t>& ret_indices ) {
 
-        for( int i = 0; i < chunks.size(); i++ ) {
+        for( int32_t i = 0; i < chunks.size(); i++ ) {
             Chunk& chunk = chunks[i];
             std::array<ec::vertex, 4> vertices = chunk.get_vertices();
             std::array<uint32_t, 6> indices = chunk.get_indices();
@@ -40,7 +40,7 @@ private:
     float chunk_size = 10;
     std::array<Chunk, size * size> chunks;
     void generate_chunks() {
-        for( int i = 0; i < size*size; i++ ) {
+        for( int32_t i = 0; i < size*size; i++ ) {
             Chunk chunk( glm::vec2{ i/size, i%size }, static_cast<float>(size), i );
             
             this->chunks[i] = chunk;

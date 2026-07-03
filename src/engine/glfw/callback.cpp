@@ -8,15 +8,15 @@
 
 namespace ec {
 
-void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods ) { 
+void key_callback( GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods ) { 
 
     BaseApp* baseApp = reinterpret_cast<BaseApp*>( glfwGetWindowUserPointer( window ) );
     baseApp->glfw_key_callback( window, key, scancode, action, mods );
 
 }
 
-void BaseApp::glfw_key_callback( GLFWwindow* window, int key, int scancode, int action, int mods ) {
-    int state = glfwGetKey( window, key );
+void BaseApp::glfw_key_callback( GLFWwindow* window, int32_t key, int32_t scancode, int32_t action, int32_t mods ) {
+    int32_t state = glfwGetKey( window, key );
 
     if( (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q ) && state == GLFW_RELEASE ) {
         auto mode = glfwGetInputMode( window, GLFW_CURSOR );

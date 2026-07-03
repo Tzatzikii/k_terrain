@@ -40,7 +40,7 @@ vk::Extent2D BaseApp::choose_swap_extent( const vk::SurfaceCapabilitiesKHR capab
         return capabilities.currentExtent;
     }
     else {
-        int width, height;
+        int32_t width, height;
         glfwGetFramebufferSize( window, &width, &height );
 
         VkExtent2D actualExtent = {
@@ -111,7 +111,7 @@ void BaseApp::create_swapchain() {
 }
 
 void BaseApp::recreate_swapchain() {
-    int width = 0, height = 0;
+    int32_t width = 0, height = 0;
     glfwGetFramebufferSize( window, &width, &height );
 
     while( width == 0 || height == 0 ) {
