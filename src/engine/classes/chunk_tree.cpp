@@ -208,7 +208,7 @@ float debug_pattern(int x, int y,
     return std::clamp(result, 0.0f, 1.0f);
 }
 
-void QuadTree::Node::calculate_noise( u_char* _dest ) {
+void QuadTree::Node::calculate_noise( uint8_t* _dest ) {
     size_t noise_size = 64;
     FastNoise noise;
 
@@ -229,9 +229,9 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
     float scale = 2.0/255.0; // map [-1;1] to [0;255]
     float ratio = static_cast<float>(this->size)/static_cast<float>(noise_size);
     
-    uint pixel_index = 0;
-    for( uint i = 0; i < noise_size; i++ ) {
-            for( uint j = 0; j < noise_size; j++ ) {
+    uint32_t pixel_index = 0;
+    for( uint32_t i = 0; i < noise_size; i++ ) {
+            for( uint32_t j = 0; j < noise_size; j++ ) {
                 float u = (j + 0.5f) / static_cast<float>(noise_size);
                 float v = (i + 0.5f) / static_cast<float>(noise_size);
 
@@ -243,7 +243,7 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
                     world_y * frequency
                 );
                // float noise_value = std::sqrt(world_x*world_x+world_y*world_y)/2048;
-                u_char pixel = static_cast<u_char>(std::clamp( (noise_value+1.0f)/scale, 0.0f, 255.0f ));
+                uint8_t pixel = static_cast<uint8_t>(std::clamp( (noise_value+1.0f)/scale, 0.0f, 255.0f ));
                 assert(pixel >= 0 && pixel <= 255);
                 _dest[pixel_index++] = pixel;
                 _dest[pixel_index++] = pixel;
@@ -252,12 +252,12 @@ void QuadTree::Node::calculate_noise( u_char* _dest ) {
         }
     }
     //std::cout << "color:" << ((static_cast<float>(index)/(255.0))) << std::endl;
-   // std::memset( _dest, static_cast<char>((static_cast<float>(index))), noise_size * noise_size * 4);
+    //std::memset( _dest, static_cast<char>((static_cast<float>(index))), noise_size * noise_size * 4);
 }
 
 
 Texture QuadTree::create_noise_texture( BaseApp* _current_app ) {
-    u_char* pixels = new u_char[64 * 64 * 4 * 4096]; // ~7 megabytes
+    uint8_t* pixels = new uint8_t[64 * 64 * 4 * 4096]; // ~7 megabytes
 
     // This solution is temporary. I don't need the pixels anymore
     Texture noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
@@ -268,7 +268,7 @@ Texture QuadTree::create_noise_texture( BaseApp* _current_app ) {
 
 
 void QuadTree::update_noise_texture( BaseApp* _current_app, Texture& _noise_texture ) {
-    u_char* noise = new u_char[64 * 64 * 4];
+    uint8_t* noise = new uint8_t[64 * 64 * 4];
 
     //noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
     auto b = _noise_texture.begin_write();

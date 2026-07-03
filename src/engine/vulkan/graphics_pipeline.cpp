@@ -19,10 +19,10 @@ vk::ShaderModule BaseApp::create_shader_module( const std::vector<char>& code ) 
 
 void BaseApp::create_graphics_pipeline() {
 
-    auto vert_shader_code = read_file( "bin/shaders/vert.spv" );
-    auto tesc_shader_code = read_file( "bin/shaders/tesc.spv" );
-    auto tese_shader_code = read_file( "bin/shaders/tese.spv" );
-    auto frag_shader_code = read_file( "bin/shaders/frag.spv" );
+    auto vert_shader_code = read_file( "build/shaders/shader.vert.spv" );
+    auto tesc_shader_code = read_file( "build/shaders/shader.tesc.spv" );
+    auto tese_shader_code = read_file( "build/shaders/shader.tese.spv" );
+    auto frag_shader_code = read_file( "build/shaders/shader.frag.spv" );
 
     vk::ShaderModule vert_shader_module = create_shader_module( vert_shader_code );
     vk::ShaderModule tesc_shader_module = create_shader_module( tesc_shader_code );

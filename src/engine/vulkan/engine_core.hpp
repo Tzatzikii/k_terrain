@@ -9,6 +9,7 @@
 #include <iostream>
 #include <chrono>
 #include <set>
+#include <cstdint>
 #include "../etc/helpers.hpp"
 #include "../etc/constants.hpp"
 #include "../classes/vertex.hpp"
