@@ -1,5 +1,5 @@
 #include "engine_core.hpp"
-#include "../classes/chunk_tree.hpp"
+#include "../classes/quadtree.hpp"
 #include <memory>
 
 

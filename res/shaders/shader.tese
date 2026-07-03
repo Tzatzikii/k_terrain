@@ -41,6 +41,8 @@ void main() {
     vec4 p1 = (p11 - p10) * u + p10;
     vec4 p = (p1 - p0) * v + p0;
 
+    p.xy += inInstanceCenter;
+
     // retrieve control point texture coordinates
     vec2 t00 = inTexCoord[0];
     vec2 t01 = inTexCoord[1];
@@ -56,7 +58,7 @@ void main() {
 
     // lookup texel at patch coordinate for height and scale + shift as desired
     //height = texture(noises[inInstanceIndex], texCoord).r * 256.0;
-    float height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 256.0;
+    float height = texture(noises, vec3(texCoord, float(inInstanceIndex))).r * 256 - 64;
     //height = pow(height * 64.0, 2.0) - 256.0;
     //float height = -5.0;
     //height = floor(height);
@@ -69,7 +71,7 @@ void main() {
     vec4 normal = normalize( vec4(cross(uVec.xyz, vVec.xyz), 0) );
 
     p.z += height; //+ log(float(inInstanceIndex));
-    p.xy += inInstanceCenter;
+    
     
     gl_Position = mvp.proj * mvp.view * p;
 

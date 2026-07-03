@@ -130,7 +130,7 @@ void BaseApp::create_instance_buffer() {
         // log2( INT32_MAX - INT32_MIN ) = log2( 2^64 ) = 64.
         // 4096 is just 64 squared since it's a 2D grid.
         const uint32_t very_max_chunk_count = 4096; 
-        vk::DeviceSize size = very_max_chunk_count * sizeof( ec::QuadTree::LeafInfo );
+        vk::DeviceSize size = very_max_chunk_count * sizeof( ec::Quadtree::LeafInfo );
         create_buffer( 
             size,
             vk::BufferUsageFlagBits::eVertexBuffer,
@@ -142,7 +142,7 @@ void BaseApp::create_instance_buffer() {
         data = device.mapMemory( instance_buffer_memory, 0, size );
     }
 
-    std::memcpy( data, instances.data(), instances.size() * sizeof( ec::QuadTree::LeafInfo ) );
+    std::memcpy( data, instances.data(), instances.size() * sizeof( ec::Quadtree::LeafInfo ) );
     
 }
 

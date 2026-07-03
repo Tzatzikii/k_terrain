@@ -13,8 +13,6 @@ void BaseApp::cleanup_swapchain() {
     device.destroyImage( shadow_depth_image, nullptr );
     device.freeMemory( shadow_depth_image_memory, nullptr );
     
-
-
     for( auto framebuffer : swapchain_framebuffers ) {
         device.destroyFramebuffer( framebuffer, nullptr ); 
     }
@@ -30,20 +28,16 @@ void BaseApp::cleanup() {
     cleanup_swapchain();
 
     texture.clean();
-    //chunk_tree->clean();
-    //noise_texture.clean();
 
     device.destroySampler( texture_sampler, nullptr );
     device.destroySampler( noise_sampler, nullptr );
-    //device.destroyImageView( texture_image_view, nullptr );
-
-   // device.destroyImage( texture_image, nullptr );
-   // device.freeMemory( texture_image_memory, nullptr );
 
 
     for( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ ) {
+
         device.destroyBuffer( uniform_buffers[i], nullptr );
         device.freeMemory( uniform_buffers_memory[i], nullptr );
+        
     }
 
     device.destroyDescriptorPool( descriptor_pool, nullptr );
@@ -56,12 +50,16 @@ void BaseApp::cleanup() {
     device.freeMemory( index_buffer_memory, nullptr );
 
     for( size_t i = 0; i < swapchain_images.size(); i++ ) {
+
         device.destroySemaphore( render_finished_semaphores[i], nullptr );
+
     }
 
     for( size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++ ) {
+
         device.destroySemaphore( image_available_semaphores[i], nullptr );
         device.destroyFence( in_flight_fences[i], nullptr );
+
     }
     device.destroyCommandPool( command_pool, nullptr );
     

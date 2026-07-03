@@ -63,8 +63,8 @@ void BaseApp::create_graphics_pipeline() {
 
     auto vertex_binding_description    = ec::vertex::get_binding_description();
     auto vertex_attribute_descriptions = ec::vertex::get_attribute_descriptions();
-    auto instance_binding_description       = ec::QuadTree::LeafInfo::get_binding_description();
-    auto instance_attribute_descriptions    = ec::QuadTree::LeafInfo::get_attribute_descriptions();
+    auto instance_binding_description       = ec::Quadtree::LeafInfo::get_binding_description();
+    auto instance_attribute_descriptions    = ec::Quadtree::LeafInfo::get_attribute_descriptions();
     constexpr size_t binding_count = 2;
     constexpr size_t attribute_count = vertex_attribute_descriptions.size() + instance_attribute_descriptions.size();
 

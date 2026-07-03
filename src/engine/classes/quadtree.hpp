@@ -7,7 +7,7 @@
 #include <queue>
 #include <iostream>
 #include "../classes/vertex.hpp"
-#include "../etc/header_libs.hpp"
+#include "../etc/lib_includes.hpp"
 #include "../vulkan/texture.hpp"
 
 namespace ec {
@@ -16,7 +16,7 @@ namespace ec {
 
 class BaseApp;    
 
-class QuadTree {
+class Quadtree {
 
 private:
 
@@ -27,7 +27,6 @@ private:
         int32_t next = 0;
 
     public:
-
         int32_t get() {
             std::cout << next << std::endl;
             if( !index_pool.empty() ) {
@@ -47,14 +46,11 @@ private:
 
     struct Node {
 
-        std::shared_ptr<QuadTree::Node> children[4] = { nullptr };
+        std::shared_ptr<Quadtree::Node> children[4] = { nullptr };
 
         int64_t level = 0;
-
         int64_t cx, cy;
-
         uint64_t size;
-
         int32_t index;
 
         bool has_noise = false;
@@ -74,11 +70,11 @@ private:
         void calculate_noise( u_char* _dest );
 
         float divide_threshold() {
-            return static_cast<float>(this->size);
+            return static_cast<float>(this->size)*2.0f;
         }
 
         float unify_threshold() {
-            return static_cast<float>(this->size)*1.5f;
+            return static_cast<float>(this->size)*4.0f;
         }
         
         bool is_divisible( float _dist_from_eye ) {
@@ -96,16 +92,16 @@ private:
         void collapse_branch( IndexPool& _index_pool );
         
         bool has_children() { return children[0] != nullptr; }
-        //std::unique_ptr<QuadTree> create_child( int local_i, int local_j );
+        //std::unique_ptr<Quadtree> create_child( int local_i, int local_j );
 
     };
 
     uint32_t next_index = 0;
     
-    void update_node( glm::vec3 _eye_pos, std::shared_ptr<QuadTree::Node> _node );
+    void update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> _node );
 
-    std::shared_ptr<QuadTree::Node> top_node;
-    std::vector<std::shared_ptr<QuadTree::Node>> leaves;
+    std::shared_ptr<Quadtree::Node> top_node;
+    std::vector<std::shared_ptr<Quadtree::Node>> leaves;
 
     IndexPool index_pool;
 
@@ -164,7 +160,7 @@ public:
         }
     };
 
-    QuadTree( uint64_t _size = INT64_MAX*2 ){}
+    Quadtree( uint64_t _size = INT64_MAX*2 ){}
     
     void get_geometry( std::vector<vertex>& _vertices, std::vector<uint32_t>& _indices, uint32_t _n );
 

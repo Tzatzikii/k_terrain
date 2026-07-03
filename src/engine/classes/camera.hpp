@@ -1,7 +1,7 @@
 #ifndef SRC_ENGINE_MATH_CAMERA_HPP
 #define SRC_ENGINE_MATH_CAMERA_HPP
 
-#include "../etc/header_libs.hpp"
+#include "../etc/lib_includes.hpp"
 
 namespace ec {
 

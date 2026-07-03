@@ -14,7 +14,7 @@
 #include "../classes/vertex.hpp"
 #include "../classes/terrain.hpp"
 #include "../classes/camera.hpp"
-#include "../classes/chunk_tree.hpp"
+#include "../classes/quadtree.hpp"
 #include "texture.hpp"
 #include <chrono>
 
@@ -156,13 +156,13 @@ protected:
 
     std::vector<ec::vertex>     vertices;
     std::vector<uint32_t>       indices;
-    std::vector<ec::QuadTree::LeafInfo> instances;
+    std::vector<ec::Quadtree::LeafInfo> instances;
 
     uint32_t                    current_frame = 0;
 
     Camera                      camera = Camera({0, 0, 0.0});
 
-    ec::QuadTree                quad_tree;
+    ec::Quadtree                quad_tree;
     
     std::array<bool, 128>   keys_pressed = std::array<bool, 128>();
 

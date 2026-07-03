@@ -13,11 +13,11 @@ layout(binding = 2) uniform sampler2DArray noiseSampler;
 
 void main() {
     float scale = 1.0/32.0;
-    //float h = 1 - height * scale;
+    // float h = 1 - height * scale;
     float c = inInstanceSize / 16.0;
     c *= 0.7;
-    //outColor = vec4(c, c, c, 1.0);
-   // outColor = vec4(.5, .5, .5, 1.0);
-    //outColor = vec4(fragTexCoord, 0.0, 1.0);
+    // outColor = vec4(c, c, c, 1.0);
+    // outColor = vec4(.5, .5, .5, 1.0);
+    // outColor = vec4(fragTexCoord, 0.0, 1.0);
     outColor = texture(noiseSampler, vec3(fragTexCoord, float(inInstanceIndex)));
 }
