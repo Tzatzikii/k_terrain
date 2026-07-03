@@ -1,7 +1,7 @@
 target_sources(KTerrain
     PRIVATE
         camera.cpp
-        chunk_tree.cpp
+        quadtree.cpp
         chunk.cpp
         object3d.cpp
         terrain.cpp
@@ -9,7 +9,7 @@ target_sources(KTerrain
 
     PUBLIC
         camera.hpp
-        chunk_tree.hpp
+        quadtree.hpp
         object3d.hpp
         terrain.hpp
         vertex.hpp
