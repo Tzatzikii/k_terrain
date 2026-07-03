@@ -70,7 +70,7 @@ public:
     }
     vk::CommandBuffer begin_write();
     void end_write( vk::CommandBuffer _cmd_buffer );
-    void write( vk::CommandBuffer _cmd_buffer, uint _offset, u_char* _pixels, size_t _size );
+    void write( vk::CommandBuffer _cmd_buffer, uint32_t _offset, uint8_t* _pixels, size_t _size );
 
 };
 

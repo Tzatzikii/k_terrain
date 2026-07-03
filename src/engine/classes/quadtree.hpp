@@ -6,6 +6,7 @@
 #include <vector>
 #include <queue>
 #include <iostream>
+#include <cstdint>
 #include "../classes/vertex.hpp"
 #include "../etc/lib_includes.hpp"
 #include "../vulkan/texture.hpp"
@@ -67,7 +68,7 @@ private:
 
         void subdivide( glm::vec3 _eye_pos );
 
-        void calculate_noise( u_char* _dest );
+        void calculate_noise( uint8_t* _dest );
 
         float divide_threshold() {
             return static_cast<float>(this->size)*2.0f;
@@ -180,7 +181,7 @@ public:
     );
     void update( glm::vec3 _eye_pos );
 
-    void calculate_noise( u_char* _dest );
+    void calculate_noise( uint8_t* _dest );
 
     void update_tree_size();
 

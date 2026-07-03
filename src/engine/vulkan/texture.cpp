@@ -72,7 +72,7 @@ void Texture::end_write( vk::CommandBuffer _cmd_buffer ) {
     current_app->end_single_time_commands( _cmd_buffer );
 }
 
-void Texture::write( vk::CommandBuffer _cmd_buffer, uint _offset, u_char* _pixels, size_t _size ) {
+void Texture::write( vk::CommandBuffer _cmd_buffer, uint32_t _offset, uint8_t* _pixels, size_t _size ) {
     
     std::memcpy( data + _offset, _pixels, _size ); 
     
