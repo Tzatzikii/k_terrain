@@ -18,7 +18,7 @@ void main() {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 
     outTexCoords[gl_InvocationID] = inTexCoords[gl_InvocationID];
-    float tessLevel = 16.0;
+    float tessLevel = 64.0;
 
     // One invocation sets tessellation levels
     if (gl_InvocationID == 0) {
@@ -26,10 +26,10 @@ void main() {
         outInstanceCenter   = inInstanceCenter[0];
         outInstanceSize     = inInstanceSize[0];
         // Outer edges
-        gl_TessLevelOuter[1] = tessLevel * inTessEdges[0].x;
-        gl_TessLevelOuter[2] = tessLevel * inTessEdges[0].y;
-        gl_TessLevelOuter[3] = tessLevel * inTessEdges[0].z;
-        gl_TessLevelOuter[0] = tessLevel * inTessEdges[0].w;
+        gl_TessLevelOuter[0] = tessLevel * inTessEdges[0].x;
+        gl_TessLevelOuter[1] = tessLevel * inTessEdges[0].y;
+        gl_TessLevelOuter[2] = tessLevel * inTessEdges[0].z;
+        gl_TessLevelOuter[3] = tessLevel * inTessEdges[0].w;
 
         // Inner (for triangles, only [0] is used)
         gl_TessLevelInner[0] = tessLevel;

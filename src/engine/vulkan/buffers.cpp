@@ -52,7 +52,7 @@ void BaseApp::create_buffer(
 
 void BaseApp::create_vertex_buffer() {
     vk::DeviceSize buffer_size = sizeof( vertices[0] ) * vertices.size();
-
+    std::cout << vertices.size() << std::endl;
     vk::Buffer staging_buffer;
     vk::DeviceMemory staging_buffer_memory;
     create_buffer( 

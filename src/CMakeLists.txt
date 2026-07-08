@@ -8,3 +8,4 @@ target_link_libraries(KTerrain
 )
 
 add_subdirectory(engine)
+add_subdirectory(imgui)

@@ -15,7 +15,7 @@ void BaseApp::load_model( std::string path ) {
     // if( !tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str() ) ) {
 
     //     if( !warn.empty() ) {
-    //         std::cout << "tinyobj warning: " << warn << std::endl;
+    //         //std::cout << "tinyobj warning: " << warn << std::endl;
     //     }
     //     throw std::runtime_error( err );
     // }
@@ -54,6 +54,7 @@ void BaseApp::load_model( std::string path ) {
     indices.push_back(1);
     indices.push_back(2);
     indices.push_back(3);
+    std::cout << "Generating terrain" << std::endl;
     quad_tree.generate(get_camera_pos());
     instances = quad_tree.get_leaf_infos();
 }    

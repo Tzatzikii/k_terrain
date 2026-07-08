@@ -18,18 +18,16 @@ namespace ec {
 class BaseApp;    
 
 class Quadtree {
-
 private:
 
     class IndexPool {
-
     private:
         std::queue<uint32_t> index_pool;
         int32_t next = 0;
 
     public:
         int32_t get() {
-            std::cout << next << std::endl;
+            //std::cout << next << std::endl;
             if( !index_pool.empty() ) {
                 int32_t index = index_pool.front();
                 index_pool.pop();
@@ -45,19 +43,19 @@ private:
 
     };
 
+    IndexPool index_pool;
+
     struct Node {
 
         std::shared_ptr<Quadtree::Node> children[4] = { nullptr };
 
         int64_t level = 0;
         int64_t cx, cy;
-        uint64_t size;
         int32_t index;
+        uint64_t size;
 
-        bool has_noise = false;
-
-        bool dirty = false;
-        bool is_leaf = false;
+        bool has_noise  = false;
+        bool leaf  = true;
 
         const int64_t   recursion_limit  = 20;
         const int64_t   min_size         = 16;
@@ -102,13 +100,11 @@ private:
     void update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> _node );
 
     std::shared_ptr<Quadtree::Node> top_node;
-    std::vector<std::shared_ptr<Quadtree::Node>> leaves;
-
-    IndexPool index_pool;
+    std::vector<std::shared_ptr<Quadtree::Node>> cache;
 
     uint64_t leaf_count = 1;
 
-    void flush_dirty();
+    void clear_cache();
 
     int32_t is_edge( std::shared_ptr<Node> _node, int32_t _side_index );
 
@@ -123,7 +119,7 @@ public:
         uint32_t index;
         glm::vec2 pos;
         float size;
-        uint32_t tess_edges[4]; // Booleans, but I want to avoid undefined behavior since glsl doesn't support booleans
+        uint32_t tess_edges[4];
 
         LeafInfo operator=( const LeafInfo& other ) {
             index = other.index;

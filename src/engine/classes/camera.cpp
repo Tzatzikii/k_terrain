@@ -12,6 +12,10 @@ void Camera::sideways( float units ) {
     this->pos = glm::translate( glm::identity<glm::mat4>(), glm::normalize( n ) * units * speed ) * this->pos;
 }
 
+void Camera::vertical( float units ) {
+    this->pos.z += units * speed;
+}
+
 void Camera::rotate( float up, float side ) {
     glm::vec3 n = this->get_normal();
     this->dir = glm::rotate( glm::rotate( glm::identity<glm::mat4>(), up/100.0f, n ), side/100.0f, this->up  ) * this->dir;

@@ -28,7 +28,7 @@ class BaseApp {
 
 public:
 
-    void run();
+    virtual void run();
     
     static VKAPI_ATTR vk::Bool32 VKAPI_CALL debug_callback( 
             vk::DebugUtilsMessageSeverityFlagBitsEXT message_severity,
@@ -73,7 +73,6 @@ protected:
     virtual void record_command_buffer( vk::CommandBuffer command_buffer, uint32_t image_index ){}
 
 
-
 //private: TEMPORARY!!!!!!
 
     GLFWwindow*                 window;
@@ -89,7 +88,7 @@ protected:
     { 
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
-    
+
     vk::SwapchainKHR            swapchain;
     std::vector<vk::Image>      swapchain_images;
     vk::Format                  swapchain_image_format;

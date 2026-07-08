@@ -22,7 +22,7 @@ void Quadtree::update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> 
     float dy = _eye_pos.y - _node->cy;
     float dist = std::sqrt(dx*dx + dy*dy);
 
-    if( _node->is_divisible( dist ) && !_node->dirty ) {
+    if( _node->is_divisible( dist ) ) {
 
         _node->subdivide( _eye_pos );
 
@@ -32,7 +32,7 @@ void Quadtree::update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> 
 
     }
 
-    else if( !_node->is_leaf && !_node->dirty ){
+    else if( _node->leaf ){
 
         _node->collapse(index_pool);
 
@@ -40,23 +40,23 @@ void Quadtree::update_node( glm::vec3 _eye_pos, std::shared_ptr<Quadtree::Node> 
             _node->index = index_pool.get();
         }
         
-        if(std::find(leaves.begin(), leaves.end(), _node) == leaves.end()) {
-            leaves.push_back(_node);
+        if(std::find(cache.begin(), cache.end(), _node) == cache.end()) {
+            cache.push_back(_node);
         }
         
     }
 
 }
 
-void Quadtree::flush_dirty() {
+void Quadtree::clear_cache() {
 
-    for( int32_t i = leaves.size() - 1; i >= 0; i--) {
+    for( int32_t i = cache.size() - 1; i >= 0; i--) {
 
-        if(leaves[i]->dirty) {
+        if(cache[i]->leaf) {
 
-            index_pool.put(leaves[i]->index);
-            leaves[i] = nullptr;
-            leaves.erase(leaves.begin() + i);
+            index_pool.put(cache[i]->index);
+            cache[i] = nullptr;
+            cache.erase(cache.begin() + i);
 
         }
 
@@ -68,16 +68,16 @@ std::vector<ec::Quadtree::LeafInfo> Quadtree::get_leaf_infos() {
 
     std::vector<ec::Quadtree::LeafInfo> leaf_infos;
 
-    for( auto leaf : leaves ) {
+    for( auto node : cache ) {
 
-        if(leaf->dirty || !leaf->is_leaf) continue; // temporary
+        if( !node->leaf ){ continue; }
         LeafInfo info;
-        info.pos = glm::vec2( leaf->cx, leaf->cy );
-        info.size = leaf->size;
-        info.index = leaf->index;
+        info.pos = glm::vec2( node->cx, node->cy );
+        info.size = node->size;
+        info.index = node->index;
 
         for( int32_t i = 0; i < 4; i++ ) {
-            info.tess_edges[i] = is_edge(leaf, i);    
+            info.tess_edges[i] = is_edge(node, i);    
         }
 
         leaf_infos.push_back(info);
@@ -86,22 +86,22 @@ std::vector<ec::Quadtree::LeafInfo> Quadtree::get_leaf_infos() {
     static auto log = leaf_infos.size();
 
     if( leaf_infos.size() != log ) {
-        std::cout << leaf_infos.size() << " / " << leaves.size() << std::endl;
+        //std::cout << leaf_infos.size() << " / " << leaves.size() << std::endl;
         log = leaf_infos.size();
     }
 
-    if( leaves.size() > leaf_infos.size() * 4 ) {
-        flush_dirty();
+    if( cache.size() > leaf_infos.size() * 4 ) {
+        clear_cache();
     }
 
     return leaf_infos;
 
 }
 
-
+// Returns the tessellation factor relative to _node for all neighboring nodes 
 int32_t Quadtree::is_edge( std::shared_ptr<Node> _node, int32_t _side_index ) {
 
-    auto closest = leaves[0];
+    auto closest = cache[0];
     glm::vec2 closest_pos = { closest->cx, closest->cy };
     glm::vec2 node_mod = {0, 0};
     glm::vec2 cmp_mod = {0, 0};
@@ -113,8 +113,8 @@ int32_t Quadtree::is_edge( std::shared_ptr<Node> _node, int32_t _side_index ) {
             break;
         }
         case 1: {
-            node_mod.y+=1;
-            cmp_mod.y=-1;
+            node_mod.y+=-1;
+            cmp_mod.y=1;
             break;
         }
         case 2: {
@@ -123,21 +123,21 @@ int32_t Quadtree::is_edge( std::shared_ptr<Node> _node, int32_t _side_index ) {
             break;
         }
         case 3: {
-            node_mod.y=-1;
-            cmp_mod.y=1;
+            node_mod.y=1;
+            cmp_mod.y=-1;
             break;
         }
     }
     // lets pray to heavens this somehow doesnt get larger than INT64_MAX, however i can hardly imagine that
-    glm::vec2 node_sc = glm::vec2(_node->cx, _node->cy) + node_mod * static_cast<float>(_node->size/2);
-    glm::vec2 cmp_sc = closest_pos + cmp_mod * static_cast<float>(closest->size/2);
+    glm::vec2 node_sc = glm::vec2(_node->cx, _node->cy) + node_mod * static_cast<float>(_node->size/2); // node side-center
+    glm::vec2 cmp_sc = closest_pos + cmp_mod * static_cast<float>(closest->size/2); // node compare side-center
     glm::vec2 diff = node_sc - cmp_sc;
     float closest_dist = glm::length(diff);
     
     // side indices are based on the vulkan tessellation indexing
     // https://docs.vulkan.org/spec/latest/chapters/tessellation.html
-    for( auto node : leaves ) {
-        if(node == _node || !_node->is_leaf || _node->dirty) continue;
+    for( auto node : cache ) {
+        if(node == _node || !node->leaf) { continue; }
         glm::vec2 pos = {node->cx, node->cy};
         cmp_sc = pos + cmp_mod * static_cast<float>(node->size/2);
         diff = node_sc - cmp_sc;
@@ -151,13 +151,13 @@ int32_t Quadtree::is_edge( std::shared_ptr<Node> _node, int32_t _side_index ) {
 }
 
 void Quadtree::Node::subdivide( glm::vec3 _eye_pos ) {
-    is_leaf = false;
+    leaf = false;
 
     if( this->has_children() ) {
-        this->children[0]->dirty = false;
-        this->children[1]->dirty = false;
-        this->children[2]->dirty = false;
-        this->children[3]->dirty = false;
+        this->children[1]->leaf = true;
+        this->children[2]->leaf = true;
+        this->children[3]->leaf = true;
+        this->children[0]->leaf = true;
         return;
     }
     int32_t iter = 0;
@@ -178,9 +178,7 @@ void Quadtree::Node::subdivide( glm::vec3 _eye_pos ) {
 
 void Quadtree::Node::collapse( IndexPool& _index_pool ) {
     collapse_branch( _index_pool );
-    this->dirty = false; // un-dirt the top of the branch
-    this->is_leaf = true;
-   
+    leaf = true;
 }
 
 void Quadtree::Node::collapse_branch( IndexPool& _index_pool ) {
@@ -190,10 +188,7 @@ void Quadtree::Node::collapse_branch( IndexPool& _index_pool ) {
         this->children[2]->collapse_branch( _index_pool );
         this->children[3]->collapse_branch( _index_pool );
     }
-    if(!dirty) {
-        dirty = true;
-    }
-
+    leaf = false;
 }
 
 float debug_pattern(int32_t x, int32_t y,
@@ -227,7 +222,7 @@ float debug_pattern(int32_t x, int32_t y,
 }
 
 void Quadtree::Node::calculate_noise( uint8_t* _dest ) {
-    size_t noise_size = 64;
+    size_t noise_size = 65;
     FastNoise noise;
 
     noise.SetNoiseType( FastNoise::NoiseType::PerlinFractal );
@@ -250,8 +245,8 @@ void Quadtree::Node::calculate_noise( uint8_t* _dest ) {
     uint32_t pixel_index = 0;
     for( uint32_t i = 0; i < noise_size; i++ ) {
             for( uint32_t j = 0; j < noise_size; j++ ) {
-                float u = (j + 0.5f) / static_cast<float>(noise_size);
-                float v = (i + 0.5f) / static_cast<float>(noise_size);
+                float u = (j) / static_cast<float>(noise_size-1);
+                float v = (i) / static_cast<float>(noise_size-1);
 
                 float world_x = center_x + (u - 0.5f) * size;
                 float world_y = center_y + (v - 0.5f) * size;
@@ -269,16 +264,18 @@ void Quadtree::Node::calculate_noise( uint8_t* _dest ) {
                 _dest[pixel_index++] = 255;
         }
     }
-    //std::cout << "color:" << ((static_cast<float>(index)/(255.0))) << std::endl;
+    ////std::cout << "color:" << ((static_cast<float>(index)/(255.0))) << std::endl;
     //std::memset( _dest, static_cast<char>((static_cast<float>(index))), noise_size * noise_size * 4);
     //std::memset( _dest, static_cast<uint8_t>(100), noise_size * noise_size * 4 );
 }
 
 
 Texture Quadtree::create_noise_texture( BaseApp* _current_app ) {
-    uint8_t* pixels = new uint8_t[64 * 64 * 4 * 4096]; // ~7 megabytes
+    size_t noise_size = 65;
+    size_t texture_size = noise_size * noise_size * 4;
+    uint8_t* pixels = new uint8_t[texture_size * 4096]; // ~7 megabytes
 
-    Texture noise_texture = Texture( _current_app, pixels, 64, 64, 2048 );
+    Texture noise_texture = Texture( _current_app, pixels, noise_size, noise_size, 2048 );
     
     delete[] pixels;
     return noise_texture;
@@ -286,13 +283,15 @@ Texture Quadtree::create_noise_texture( BaseApp* _current_app ) {
 
 
 void Quadtree::update_noise_texture( BaseApp* _current_app, Texture& _noise_texture ) {
-    uint8_t* noise = new uint8_t[64 * 64 * 4];
+    size_t noise_size = 65;
+    size_t texture_size = noise_size * noise_size * 4;
+    uint8_t* noise = new uint8_t[texture_size];
 
     auto b = _noise_texture.begin_write();
-    for( auto node : leaves ) {
+    for( auto node : cache ) {
         if( node->has_noise ) {continue;}
         node->calculate_noise( noise );
-        _noise_texture.write( b, node->index*64*64*4, noise, 64*64*4);
+        _noise_texture.write( b, node->index*texture_size, noise, texture_size );
         node->has_noise = true;
     }
     _noise_texture.end_write(b);

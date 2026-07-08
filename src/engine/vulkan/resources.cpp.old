@@ -192,10 +192,10 @@ void BaseApp::copy_buffer_to_image( vk::Buffer buffer, vk::Image image, uint32_t
 void BaseApp::init_window() {
 #ifdef WAYLAND
     glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_WAYLAND);
-    std::cout << "running on wayland" << std::endl;
+    //std::cout << "running on wayland" << std::endl;
 #elif defined X11
     glfwInitHint(GLFW_PLATFORM, GLFW_PLATFORM_X11);
-    std::cout << "running on x11" << std::endl;
+    //std::cout << "running on x11" << std::endl;
 #endif
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -1351,7 +1351,7 @@ void BaseApp::load_model() {
     if( !tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str() ) ) {
 
         if( !warn.empty() ) {
-            std::cout << "tinyobj warning: " << warn << std::endl;
+            //std::cout << "tinyobj warning: " << warn << std::endl;
         }
         throw std::runtime_error( err );
     }
